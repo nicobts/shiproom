@@ -1,0 +1,45 @@
+{
+  "name": "shiproom",
+  "version": "0.2.0",
+  "description": "Shiproom \u2014 the go/no-go room for your idea. An adversarial AI council (CTO, CFO, VC, CMO, CEO, your customer, a Chair) that won't tell you your idea is great. Runs in any coding agent; CLI handles the plumbing.",
+  "bin": {
+    "shiproom": "cli/index.js"
+  },
+  "files": [
+    "cli",
+    "council",
+    "dashboard",
+    "skills",
+    "commands",
+    "SHIPROOM.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "shiproom",
+    "ai-agents",
+    "validation",
+    "claude-code",
+    "agents-md",
+    "skills",
+    "startup",
+    "adversarial",
+    "cli"
+  ],
+  "author": "Nicolas Bossi <nicolasbossi@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicobts/shiproom.git"
+  },
+  "homepage": "https://github.com/nicobts/shiproom#readme",
+  "bugs": {
+    "url": "https://github.com/nicobts/shiproom/issues"
+  }
+}

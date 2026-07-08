@@ -1,0 +1,28 @@
+name: validate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  verdicts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate every verdict.json in the Docket and examples
+        run: |
+          set -e
+          found=0
+          for f in $(find docket council/examples example -name 'verdict.json' 2>/dev/null); do
+            found=1
+            echo "::group::$f"
+            node cli/index.js validate "$f"
+            echo "::endgroup::"
+          done
+          [ "$found" = "1" ] || { echo "no verdict.json files found"; exit 1; }
+      - name: CLI smoke test
+        run: node cli/index.js --help

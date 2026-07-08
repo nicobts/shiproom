@@ -1,0 +1,6 @@
+dist/
+.council/
+node_modules/
+
+# private — never published (launch kit, drafts, source assets)
+exclude/

@@ -1,0 +1,121 @@
+{
+  "project": "Snipvault",
+  "tagline": "A code-snippet manager with team sharing — illustrative sample, fictional project",
+  "date": "2026-07-04",
+  "sample": true,
+  "constraints": [
+    "Solo developer, ~8 hours/week",
+    "Prototype built; no users yet",
+    "Stated goal: turn it into a paid product"
+  ],
+  "factBase": [
+    {
+      "fact": "Snippet management is a crowded category: GitHub Gists is free and ubiquitous; multiple paid incumbents exist in the $5-10/user/mo range",
+      "source": "illustrative example"
+    },
+    {
+      "fact": "Modern editors and AI assistants generate snippets on demand, shrinking the reuse problem the category was built on",
+      "source": "illustrative example"
+    },
+    {
+      "fact": "No incumbent has meaningful team-permission workflows for snippets",
+      "source": "illustrative example — claimed white space"
+    }
+  ],
+  "members": [
+    {
+      "seat": 1,
+      "role": "CTO",
+      "title": "Technical defensibility & maintenance reality",
+      "vote": "SHELVE",
+      "argument": "Nothing here is defensible: a snippet CRUD with sharing is a weekend build for any incumbent, and the claimed white space (team permissions) is a sprint, not a moat. The hidden burden is sync and editor-plugin maintenance across VS Code, JetBrains, and vim — a permanent tax that has ground down better-funded teams in this exact category.",
+      "keyNumber": "~1 sprint for an incumbent to copy the differentiator",
+      "flipCondition": "A technical wedge incumbents structurally can't follow — none is currently proposed",
+      "action": "Before writing more code, list what the incumbents' changelogs shipped in the last year; if team features appear, this is over",
+      "reactsTo": null,
+      "fullAssessment": "## Framing\nI restate the case as: \"should a solo builder spend further weekends on a snippet manager whose differentiator is team sharing?\" The alternative framing — \"is there any technically defensible product in the snippet space at all?\" — matters, because my answer to the second drives the first.\n\n## Analysis\nThe build is a CRUD store, a share/permission layer, and editor plugins. None of it is novel; the permission layer the pitch calls white space is a bounded feature any incumbent ships in one sprint, because the data model (snippet → owner → grantees) is trivial. The genuinely hard part is the one the pitch ignores: editor-plugin maintenance. VS Code, JetBrains, and vim move on independent release cadences; every breakage is a support ticket, and plugin rot is the documented killer of small tools in this category.\n\n## Evidence & assumptions\nFacts: incumbents exist at $5–10/user/mo; GitHub Gists is free (fact base). ESTIMATE: 1 sprint for an incumbent to replicate team permissions — based on the data model's simplicity, not on any incumbent's roadmap. ESTIMATE: plugin maintenance ≈ 2–4 hrs/week once three editors are supported.\n\n## Risks\n1. **Plugin rot** (high): permanent tax that grows with adoption. 2. **Instant copyability** (high): success invites a one-sprint clone. 3. **Sync conflicts** (medium): the first team feature request will be offline sync — a hard problem for no strategic gain.\n\n## What would change my mind\nA wedge incumbents structurally can't follow: e.g., deep integration with a proprietary internal toolchain, or a compliance/governance angle (see CFO). Watch for: incumbents' changelogs shipping team features (kill signal), or enterprise snippet-governance RFPs appearing (revive signal).\n\n## Recommendations\n1. Before any further code, audit the top three incumbents' last 12 months of changelogs; if team features shipped, stop.\n2. If continuing at all, support ONE editor and refuse the other plugins.\n3. Cap total future investment at one weekend (see CEO) and treat the codebase as a portfolio artifact: polish the README over the features."
+    },
+    {
+      "seat": 2,
+      "role": "CFO",
+      "title": "Unit economics",
+      "vote": "SHELVE",
+      "argument": "I agree with the CTO and add the demand-side problem: the price ceiling is anchored by a free incumbent, so realistic ARPU is $5/mo against a shrinking problem. At plausible conversion, reaching even $1K MRR needs thousands of active users acquired in a category with no organic search growth. The hours are worth more elsewhere.",
+      "keyNumber": "$5/mo ceiling × shrinking problem = math that never closes",
+      "flipCondition": "Evidence of teams paying for snippet governance today (procurement, compliance) — a different buyer than developers",
+      "action": "Spend one evening searching for that buyer before spending another on the code",
+      "reactsTo": "Agrees with CTO; adds that even uncopied, the demand math fails",
+      "fullAssessment": "## Framing\nRestated: \"can this reach meaningful revenue inside this builder's constraint envelope?\" Alternative framing — \"is there any buyer for whom snippets are a budget line?\" — is the only version with a non-obvious answer.\n\n## Analysis\nPrice is anchored by a free incumbent (Gists), so realistic ARPU sits at the bottom of the $5–10 band; call it $5/mo blended. $1K MRR therefore needs ~200 paying users; at a 2% free-to-paid conversion that implies ~10,000 actives — in a category with flat-to-declining organic demand, acquired by a solo builder at 8 hrs/week. The months-to-milestone math does not close under any honest assumption. The one exception worth naming: compliance. If any regulated team must govern what code fragments employees share (audit trails, retention), \"snippet governance\" becomes a procurement item at 10–20× the consumer price. I found no evidence this buyer exists; I also can't rule it out from the fact base.\n\n## Evidence & assumptions\nFacts: competitor pricing $5–10/user/mo (fact base). ESTIMATES, all flagged: 2% conversion (industry-typical for OSS-adjacent tools), $5 blended ARPU, 10K actives required. No demand-side data exists in either direction — that absence is itself the finding.\n\n## Risks\n1. **Zero-price anchor** (high): the free incumbent caps willingness to pay permanently. 2. **Shrinking demand** (high): AI assistants dissolve the reuse habit. 3. **Opportunity cost** (high): these are the builder's only 8 hours.\n\n## What would change my mind\nOne procurement-driven buyer: a compliance officer, not a developer, asking for snippet governance. Watch: RFPs, SOC2 tooling lists, security-team forums.\n\n## Recommendations\n1. Spend one evening — not one sprint — searching for the compliance buyer (security forums, RFP databases).\n2. If not found, stop all revenue framing; reclassify as portfolio work.\n3. Never build billing for this."
+    },
+    {
+      "seat": 3,
+      "role": "VC",
+      "title": "Venture shape",
+      "vote": "SHELVE",
+      "argument": "Feature, not company — and a feature of a category whose core problem is being dissolved by AI-generated code. The market isn't just crowded; it's evaporating. Timing is the strongest argument against, not competition.",
+      "keyNumber": "TAM derivative: negative",
+      "flipCondition": "None within this framing; a pivot to AI-context management would be a different council",
+      "action": "If the itch is real, reframe around what AI assistants need (context, not snippets) and re-run the council on that",
+      "reactsTo": "Extends CFO: the demand problem is structural, not just quantitative",
+      "fullAssessment": "## Framing\nRestated: \"is this venture-shaped?\" The alternative framing the builder should sit with: \"what is the terminal size of the best possible outcome?\" — because for this idea, even flawless execution lands small.\n\n## Analysis\nClassification: feature, not company — and a feature of a dissolving category. The core behavior (file a snippet, retrieve it later) is being replaced by a superior substitute: asking an AI assistant, which regenerates the pattern with current context instead of retrieving a stale one. When the substitute is better AND lower-friction, the category doesn't shrink, it evaporates. Timing is therefore the strongest argument against — stronger than competition. The Gists-anchored pricing (CFO) and one-sprint copyability (CTO) are secondary: they describe why winning would be hard; the timing describes why winning would be worthless.\n\n## Evidence & assumptions\nFacts: crowded category, free incumbent, AI-generation trend (fact base). ESTIMATE: category demand trajectory is negative — inferred from substitution logic, not measured; I flag that no seat has usage data, and the ICP's lived behavior (below) is our only demand observation.\n\n## Risks\nFor a hypothetical investor: total — no moat, no growth market, no team leverage. For the builder: only opportunity cost, which the CEO must price.\n\n## What would change my mind\nNothing within this framing. A pivot to what AI assistants actually need — context management, prompt/pattern libraries with team governance — would be a different company in a growing category, and I would want that council run.\n\n## Recommendations\n1. Do not raise, do not bootstrap, do not extend this framing.\n2. Extract the reusable asset: the team-sharing/permissions code is a fine module for a future product.\n3. If the itch persists, re-run the council on the AI-context-management reframing within 30 days — while the interest is warm."
+    },
+    {
+      "seat": 4,
+      "role": "CMO",
+      "title": "Distribution & positioning",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I partially dissent: the deliberation is right about the business, but a polished OSS release costs one weekend and buys a portfolio piece plus list-building in dev communities. Distribution channels exist (r/webdev, HN) even if the paid path doesn't. Ship it as a gift, measure nothing but reach.",
+      "keyNumber": "1 weekend to a shippable OSS release",
+      "flipCondition": "If the launch itself would take more than a weekend, my vote joins the SHELVE column",
+      "action": "Cut every feature that isn't needed for a one-weekend OSS release",
+      "reactsTo": "Disagrees with VC on the conclusion, not the analysis: dead market, but live distribution value",
+      "fullAssessment": "## Framing\nRestated: \"is there any distribution value left in this artifact?\" I accept the bench's business verdict and answer a narrower question than my colleagues — deliberately.\n\n## Analysis\nDead market, live channels. A polished OSS snippet manager still has functioning distribution: r/webdev and HN reward well-made small tools regardless of market size, and \"I built the snippet manager nobody needs\" is, frankly, a better post title than most launches get. The value on the table is not users; it is reach — a portfolio piece, a few hundred stars, an email list of developers who like the builder's craft. That asset transfers to whatever the builder ships next; the market analysis does not diminish it. My dissent from the bench is therefore narrow and priced: one weekend, no more.\n\n## Evidence & assumptions\nFacts: the named channels exist and are free. ESTIMATE: a well-executed small-tool post earns 100–500 stars in this climate — pattern-matched from similar launches, unverified. ESTIMATE: zero conversion from stars to revenue (consistent with CFO).\n\n## Risks\n1. **Scope creep** (high): \"one weekend\" becoming four is the only way my vote turns out wrong. 2. **Reputation dilution** (low): shipping into a dead category reads as craft, not misjudgment, IF the README is self-aware about it.\n\n## What would change my mind\nIf the release cannot fit one weekend, I join the SHELVE column — my vote is conditional on the cap, not the market.\n\n## Recommendations\n1. Cut to a one-weekend release: one editor, no billing, no roadmap section.\n2. Write the README self-aware (\"a love letter to a dying category\") — the honesty IS the marketing.\n3. Put a link to the builder's next project in the footer; that link is the entire ROI."
+    },
+    {
+      "seat": 5,
+      "role": "CEO",
+      "title": "Focus & sequencing",
+      "vote": "SHELVE",
+      "argument": "The CMO's weekend-release is acceptable only as an exit, not a beginning: ship what exists, archive the repo, and reclaim the hours. Any threshold-setting here would be theater — the council should not pretend there's an experiment worth pre-committing to.",
+      "keyNumber": "0 further weekends after the release",
+      "flipCondition": "The CFO's compliance buyer materializing would reopen the case",
+      "action": "One weekend to publish as-is, then archive and move to the next idea",
+      "reactsTo": "Adopts CMO's release as a graceful shutdown, not a launch",
+      "fullAssessment": "## Framing\nRestated: \"what do these 8 hours a week buy, and where should they go?\" Every other framing is a subset of this one.\n\n## Analysis\nThe bench converges: no demand (ICP), no math (CFO), no moat (CTO), no market trajectory (VC), residual distribution value (CMO). My job is to convert that convergence into a resource decision with a hard edge. The CMO's weekend-release is acceptable — but only classified correctly: it is an exit with a souvenir, not a launch with a roadmap. The danger is not the weekend; it is the second weekend, which arrives disguised as a bug report. So the decision needs a mechanism, not a intention: ship, archive, redirect.\n\n## Evidence & assumptions\nAll inherited from prior seats; I add none. The one number I own: 0 further weekends after the release — a decision, not an estimate.\n\n## Risks\n1. **The second weekend** (high): mitigated by archiving the repo, which converts \"maintenance\" into a conscious un-archiving decision. 2. **Sunk-cost pull** (medium): the VC's pivot suggestion is the healthy outlet for it.\n\n## What would change my mind\nThe CFO's compliance buyer materializing with a name and a budget — that reopens the case as a different product at a different price.\n\n## Recommendations\n1. Ship the CMO's one-weekend release, then **archive the repository the same day** — archiving is the commitment device.\n2. Redirect the reclaimed hours to the VC's reframing question within 30 days.\n3. Write the shutdown note in the README (date, reason, what you learned) — it reads as maturity and costs ten minutes.\n4. Reread this verdict before the next 'quick weekend project' in a crowded category."
+    },
+    {
+      "seat": 6,
+      "role": "ICP",
+      "title": "The target user — a working developer",
+      "vote": "SHELVE",
+      "argument": "Honest pain: 2/10. I paste snippets into my AI assistant's chat and it remembers the pattern better than I file it; the last time I opened my snippet manager was months ago. I wouldn't pay, and I wouldn't switch for free.",
+      "keyNumber": "Pain 2/10; willingness to pay: none",
+      "flipCondition": "None — the behavior this product organizes is one I've already stopped doing",
+      "action": "Ask five developer friends when they last opened a snippet manager; believe their answers",
+      "reactsTo": "Confirms VC's evaporation thesis from lived behavior",
+      "fullAssessment": "## Framing\nRestated from where I sit: \"would this change what I do on a Tuesday?\" That is the only framing a user has.\n\n## Analysis\nMy honest Tuesday: I hit a pattern I've solved before, I ask my AI assistant, it regenerates the pattern adapted to the file I'm in. That last part is why retrieval lost — a stored snippet is frozen in the context of the day I saved it; the regenerated one fits today's code. My snippet manager isn't losing to a competitor; it's losing to a better verb. I opened it last sometime months ago, to look for something I then regenerated anyway. Team sharing doesn't change this: my team shares patterns through code review and the assistant's context, not through a library we'd all have to remember to garden.\n\n## Evidence & assumptions\nThis filing IS the evidence — one user's lived behavior, honestly reported. I flag its limits: n=1, and I'm the AI-forward end of the market. A survey of five less AI-adopted colleagues (my recommendation below) would bound how far behind me the median developer is.\n\n## Risks\nFor me as a user: none — I simply won't adopt. That IS the risk, and it belongs to the builder.\n\n## What would change my mind\nNothing in the snippet framing. What I'd actually adopt tomorrow: a *team prompt/context library* — the patterns my team feeds our assistants, versioned and shared. That is the reusable itch under this idea.\n\n## Recommendations\n1. Ask five developer colleagues when they last opened a snippet manager; write the answers down verbatim.\n2. Pay attention to what I said I'd adopt — the context-library reframing overlaps the VC's pivot exactly; two seats arriving there independently is a signal.\n3. Score the pain of THAT idea before building anything."
+    },
+    {
+      "seat": 7,
+      "role": "Chair",
+      "title": "Synthesis",
+      "vote": "SHELVE",
+      "argument": "Tally: SHELVE six, SHIP_AND_SEE one (CMO). The disagreement is narrow — whether the weekend OSS release is worth doing on the way out — and the CEO resolved it by adopting it as the exit. The ICP's 2/10 pain score outranks everything else said here.",
+      "keyNumber": "6–1–0",
+      "flipCondition": "N/A — synthesis seat",
+      "action": "Reread this before the next 'quick weekend project' in a crowded category",
+      "reactsTo": "Synthesis of all seats",
+      "fullAssessment": "## Framing\nNo new arguments; my filing records the shape of the deliberation itself.\n\n## Analysis\nSix seats reached SHELVE through four independent routes — economics (CFO), copyability (CTO), market trajectory (VC), and lived user behavior (ICP) — which is the strongest form of convergence: not one argument repeated, but distinct disciplines arriving at one answer. The single dissent (CMO) is narrow, priced, and conditional, and the CEO absorbed it as an exit mechanism rather than contesting it. Two seats (VC and ICP) independently surfaced the same pivot — AI context/prompt libraries with team governance — without coordinating; per protocol I flag independent convergence on an unrequested idea as the run's most valuable byproduct.\n\n## Evidence & assumptions\nThe deliberation record. One process note: the ICP's n=1 evidence carried decisive weight, consistent with the charter's rule that the customer voice outranks strategy — the bench should confirm it cheaply (the ICP's five-colleague survey) before treating it as settled.\n\n## Risks\nProcess risk only: the builder honoring the verdict for a month and then quietly un-archiving. The CEO's same-day archive mechanism is the mitigation; this filing is the paper trail.\n\n## What would change my mind\nN/A — synthesis seat.\n\n## Recommendations\n1. Execute the CEO's ship-archive-redirect sequence as one motion, not three decisions.\n2. Run the five-colleague survey within two weeks; append the answers to this docket entry.\n3. Bring the context-library reframing back to a fresh council within 30 days — with the ICP seat asked first."
+    }
+  ],
+  "verdict": {
+    "decision": "SHELVE",
+    "summary": "Snipvault is a well-built answer to a question developers have stopped asking. The category is crowded, the price ceiling is free, and the core problem is being dissolved by AI-generated code — the target user rated the pain 2 out of 10. Publish what exists as a one-weekend open-source release, archive it with pride, and spend the reclaimed hours on a problem someone still has.",
+    "disagreement": "CMO vs the bench: is the weekend OSS release a launch or a funeral? Resolved by the CEO — it's a graceful exit, capped at one weekend.",
+    "experiment": {
+      "description": "None pre-committed — the council declines to manufacture an experiment where no live question remains",
+      "deadline": "n/a",
+      "thresholds": []
+    }
+  }
+}

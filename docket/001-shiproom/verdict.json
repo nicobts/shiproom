@@ -1,0 +1,113 @@
+{
+  "project": "Shiproom",
+  "tagline": "The AI council that won't tell you your idea is great — judged by itself",
+  "date": "2026-07-04",
+  "sample": false,
+  "runner": "Claude (Anthropic), run conversationally per council/CHARTER.md; first entry in the Docket",
+  "constraints": [
+    "Solo builder, nights & weekends, limited hours",
+    "The builder's primary project is in flight with its own pending launch that must not slip",
+    "Stated goal: community visibility and credibility, explicitly not revenue"
+  ],
+  "factBase": [
+    { "fact": "AGENTS.md is the cross-tool agent-instruction standard: Linux Foundation-stewarded, read by 25+ tools, adopted in 60,000+ open-source repos", "source": "agents.md; codex.danielvaughan.com, May 2026" },
+    { "fact": "PRPM registry hosts 7,000+ cross-format agent-guidance packages — an existing passive distribution channel", "source": "prpm.dev, 2025" },
+    { "fact": "LLM sycophancy (models agreeing with and flattering users) is documented in research and a running joke in builder communities", "source": "LLM alignment literature; community observation" },
+    { "fact": "Spec-driven development (OpenSpec, Spec Kit) is an established movement the protocol can position as the step before", "source": "openspec.dev; morphllm.com guide, 2026" },
+    { "fact": "Most prompt-framework repos plateau at low double-digit stars and die quietly", "source": "ESTIMATE — unverified, directionally accepted by all seats" }
+  ],
+  "members": [
+    {
+      "seat": 1,
+      "role": "CTO",
+      "title": "Technical defensibility & maintenance reality",
+      "vote": "SHIP_AND_SEE",
+      "argument": "The moat is exactly zero and I won't dress that up: the entire product is markdown plus one HTML file, and a competent copier reproduces it in under an hour. The compensating facts: there is also zero operational burden — no servers, no abuse surface, no on-call — so the maintenance tax reduces to PR review plus one real risk nobody has named yet: prompt rot. The protocol's bite depends on models actually obeying adversarial ground rules, and that compliance drifts with every model release; without a regression check, the council silently degrades back into flattery and the brand dies of the exact disease it claims to cure.",
+      "keyNumber": "<1 hour to copy the entire product; 0 infrastructure to run it",
+      "flipCondition": "Evidence the share loop builds a recognized brand (the one asset a copier cannot clone in an hour) would move me to INVEST",
+      "action": "Build a drift canary: a fixture project with a known honest verdict, re-run against each new model release; unanimous cheerfulness fails the build",
+      "reactsTo": null
+    },
+    {
+      "seat": 2,
+      "role": "CFO",
+      "title": "Unit economics & return on hours",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I agree with the CTO that the moat is zero, and I rule it irrelevant: this is not a business, it is a reputation asset, and its P&L is denominated in credibility, not dollars. The cost side is unusually clean — roughly two part-time weeks to launch-ready, near-zero marginal cost after — while the return is an asymmetric bet: a hard floor (a good portfolio piece exists regardless) and an uncapped ceiling (one front-page moment compounds into an audience for everything the builder ships next). The only real liability on this balance sheet is schedule risk: every day this project runs past its box is a day taken from the builder's primary project, the asset with actual revenue potential.",
+      "keyNumber": "~2 part-time weeks = the entire downside; the timebox IS the risk control",
+      "flipCondition": "Clearing 1,000 stars or an equivalent distribution event would justify promoting this to INVEST (ongoing maintained project)",
+      "action": "Write both launch dates — council and primary project — in the calendar today, before any more code",
+      "reactsTo": "Agrees with CTO that the moat is zero; disagrees that it matters — reputation assets are defended by recognition, not code"
+    },
+    {
+      "seat": 3,
+      "role": "VC",
+      "title": "Venture shape & investability",
+      "vote": "SHELVE",
+      "argument": "As an investment, this is a SHELVE and I will not launder the vocabulary to avoid saying so: no revenue mechanism, no retention surface, no moat, and by explicit design no path to any of the three. I disagree with the CFO's framing that reputation returns make this 'investable' — that stretches my mandate until it means nothing; credibility is real value but it is not an asset class I can price. I also flag a protocol defect this very run exposes: the verdict vocabulary strains when the project isn't a business — 'INVEST' here means hours, not capital — which is an argument for the scoping layer that assigns each case a fitting verdict set. My dissent is the system working: if this council could not produce a SHELVE against its own creator, it would be worthless.",
+      "keyNumber": "$0 revenue potential — by design, permanently",
+      "flipCondition": "A hosted verdict gallery with meaningful recurring traffic would make this a top-of-funnel asset attached to something monetizable — then we can talk",
+      "action": "Decide now what the credibility is FOR; an audience without a product to point it at depreciates fast",
+      "reactsTo": "Disagrees with CFO: reputation is real value but not an investable return; refusing to stretch the mandate is the point of having mandates"
+    },
+    {
+      "seat": 4,
+      "role": "CMO",
+      "title": "Distribution & positioning",
+      "vote": "INVEST",
+      "argument": "I disagree with the VC's frame entirely: distribution assets are judged by reach, not revenue, and this one has all three virality ingredients at once — a universally felt pain (sycophancy is memed daily in every builder community), a shareable artifact with a visual signature (the bench + verdict reads like a Wordle square for founders), and a meta launch story (the council judging itself, which is this very document). My kill case, stated first as required: the prompt-framework graveyard is vast because text-only repos give people nothing to screenshot — so the dashboard and share card are not polish, they are the entire differentiation, and launching without the auto-generated share image throws away most of the loop. The falsifiable claim I stake my vote on: the side-by-side screenshot (naive flattery vs. council verdict) will outperform every sentence of copy we write.",
+      "keyNumber": "3 virality ingredients present; 1 screenshot carries the launch",
+      "flipCondition": "If a small pre-launch test of the self-verdict screenshot (one tweet, one Discord drop) produces no organic pull, I downgrade to SHIP_AND_SEE",
+      "action": "Build the OG share-card generator before anything else in the kit — every shared verdict must unfurl beautifully or the loop leaks",
+      "reactsTo": "Disagrees with VC: reach is the correct denominator for a distribution asset; revenue was never the claim"
+    },
+    {
+      "seat": 5,
+      "role": "CEO",
+      "title": "Focus & sequencing",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I adopt the CFO's timebox as the governing constraint and I partially adopt the VC's complaint as a product decision: the verdict-vocabulary strain is real, so the v0.2 scoping layer ships only what fits inside the box — the Clerk and per-template verdict sets — and every additional template beyond the launch minimum is killed until after both launches. The one bet: council launches first (universal appeal, zero infrastructure risk, manufactures the audience), the builder's primary project follows four weeks later and inherits that audience. Sequencing is the entire risk here; the tool is cheap, the calendar is not.",
+      "keyNumber": "2-week build box; 4-week gap between launches; both dates fixed today",
+      "flipCondition": "The pre-committed thresholds below — clearing them promotes this to INVEST, missing all of them means the repo goes to maintenance mode the same week",
+      "action": "Assemble the launch kit this week: self-verdict published, share card, README hero, Show HN draft — nothing else",
+      "reactsTo": "Endorses CFO's timebox as the risk control; converts VC's vocabulary objection into the v0.2 scope cut-line"
+    },
+    {
+      "seat": 6,
+      "role": "ICP",
+      "title": "The target user's reality check — a builder mid-project",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I'm a builder who just pitched an idea to my coding agent and got 'that's a great idea!' back. Honest pain: 6/10 — I know the flattery is empty, but my current workaround is typing 'now argue against it,' and I believe that's sufficient even though it isn't (the single devil's-advocate persona collapses back into agreement within two turns; I just haven't noticed). Here is where I half-disagree with the CMO: the screenshot absolutely gets my click, but the clone loses me — I will not `git clone` a repo to ask a question, ever; I WILL paste one file or reference one URL. Give me a single self-contained SHIPROOM.md and I'll use it the same minute I see the screenshot; make me install something and I'll star the repo, feel virtuous, and never run it. And yes — I would gleefully share my own SHELVE verdict; getting roasted well is a badge in my community.",
+      "keyNumber": "Pain 6/10; willingness to install: near zero; willingness to paste one file: high",
+      "flipCondition": "A zero-install one-paste mode existing is the difference between 'nice repo' and 'thing I actually ran'",
+      "action": "Ship the one-file council as the primary CTA; the repo is for contributors, the file is for users",
+      "reactsTo": "Half-disagrees with CMO: the share loop gets the click, but clone friction kills the conversion — the loop needs a zero-install landing step"
+    },
+    {
+      "seat": 7,
+      "role": "Chair",
+      "title": "Synthesis",
+      "vote": "SHIP_AND_SEE",
+      "argument": "Tally: SHIP_AND_SEE five, INVEST one (CMO), SHELVE one (VC) — 5–1–1, and the split is the healthiest possible outcome for a tool whose brand is refusing unanimity. The strongest unresolved disagreement is VC vs CFO/CMO on whether reputation is an investable return; the CEO's timebox resolves it operationally by capping the downside and letting the upside be discovered rather than argued. Two seat contributions are adopted as launch requirements, not suggestions: the ICP's zero-install one-file mode, and the CTO's drift canary — the first protects adoption, the second protects the brand's honesty, and this tool has nothing else worth protecting.",
+      "keyNumber": "5–1–1",
+      "flipCondition": "N/A — synthesis seat",
+      "action": "Publish this verdict unedited as Docket entry #001; reread it at the three-week mark and act on the thresholds without renegotiation",
+      "reactsTo": "Synthesis of all seats"
+    }
+  ],
+  "verdict": {
+    "decision": "SHIP_AND_SEE",
+    "summary": "Shiproom is a reputation asset, not a business, and it should be launched exactly like one: fast, timeboxed, and led by its most shareable artifact — this verdict. The moat is zero, the cost is two part-time weeks, and the upside is the audience every future project inherits; the only real risk is the calendar, so both launch dates get fixed today. Ship it, measure three weeks, and let the thresholds — not the enthusiasm — decide whether it graduates to a maintained project.",
+    "disagreement": "VC vs CFO/CMO: is reputation an investable return or a category error? Resolved operationally, not philosophically — the timebox caps the downside, the thresholds price the upside, and the VC's dissent stays on the record as proof the council can rule against its own creator.",
+    "experiment": {
+      "description": "Public launch of the repo led by this self-verdict: one-file SHIPROOM.md as primary CTA, share card on every verdict, Show HN + Product Hunt + agent-ecosystem registries (PRPM, awesome lists)",
+      "deadline": "3 weeks after launch day; launch day within 2 weeks of this verdict",
+      "thresholds": [
+        { "metric": "GitHub stars", "target": "500" },
+        { "metric": "HN front page or PH top 10", "target": "1 of 2" },
+        { "metric": "External seat/template PRs", "target": "3" },
+        { "metric": "Published Docket verdicts by others", "target": "10" }
+      ]
+    }
+  }
+}

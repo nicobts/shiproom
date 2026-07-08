@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nicobts/shiproom/council/verdict.schema.json",
+  "title": "Shiproom Verdict",
+  "type": "object",
+  "required": [
+    "project",
+    "date",
+    "members",
+    "verdict"
+  ],
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "One-line description of the project"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "sample": {
+      "type": "boolean",
+      "description": "True if this is illustrative sample data, not a real council run"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The builder's binding constraints (hours, funding, team, goal)"
+    },
+    "factBase": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "fact"
+        ],
+        "properties": {
+          "fact": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "members": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "seat",
+          "role",
+          "vote",
+          "argument",
+          "flipCondition",
+          "action"
+        ],
+        "properties": {
+          "seat": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "role": {
+            "type": "string",
+            "description": "e.g. CTO, CFO, VC, CMO, CEO, ICP, Chair"
+          },
+          "title": {
+            "type": "string",
+            "description": "Longer seat description"
+          },
+          "vote": {
+            "enum": [
+              "INVEST",
+              "SHIP_AND_SEE",
+              "SHELVE",
+              "ABSTAIN"
+            ]
+          },
+          "argument": {
+            "type": "string",
+            "description": "The member's core argument, 2-6 sentences"
+          },
+          "keyNumber": {
+            "type": "string",
+            "description": "The single most important figure this member computed or cited"
+          },
+          "flipCondition": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "reactsTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Which prior member this seat agreed/disagreed with, and how (null for seat 1)"
+          },
+          "fullAssessment": {
+            "type": "string",
+            "description": "The seat's complete written assessment in markdown: framing, analysis, evidence & assumptions, ranked risks, expanded flip conditions, prioritized recommendations. Unbudgeted \u2014 this is where the depth lives."
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "required": [
+        "decision",
+        "summary"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "INVEST",
+            "SHIP_AND_SEE",
+            "SHELVE"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "The Chair's three-sentence closing summary"
+        },
+        "disagreement": {
+          "type": "string",
+          "description": "The strongest unresolved disagreement"
+        },
+        "experiment": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "deadline": {
+              "type": "string"
+            },
+            "thresholds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "metric",
+                  "target"
+                ],
+                "properties": {
+                  "metric": {
+                    "type": "string"
+                  },
+                  "target": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "grill": {
+      "type": "object",
+      "description": "Optional interrogation/appeal results (see council/GRILL.md)",
+      "required": [
+        "mode",
+        "openWounds",
+        "finalDecision"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "appeal",
+            "standalone"
+          ]
+        },
+        "openWounds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notableExchanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "seat",
+              "question",
+              "grade"
+            ],
+            "properties": {
+              "seat": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "answerSummary": {
+                "type": "string"
+              },
+              "grade": {
+                "enum": [
+                  "ANSWERED",
+                  "PARTIAL",
+                  "DODGED"
+                ]
+              }
+            }
+          }
+        },
+        "revisedVotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "role",
+              "from",
+              "to",
+              "because"
+            ],
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "from": {
+                "enum": [
+                  "INVEST",
+                  "SHIP_AND_SEE",
+                  "SHELVE",
+                  "ABSTAIN"
+                ]
+              },
+              "to": {
+                "enum": [
+                  "INVEST",
+                  "SHIP_AND_SEE",
+                  "SHELVE",
+                  "ABSTAIN"
+                ]
+              },
+              "because": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "retally": {
+          "type": "string"
+        },
+        "finalDecision": {
+          "enum": [
+            "INVEST",
+            "SHIP_AND_SEE",
+            "SHELVE"
+          ]
+        }
+      }
+    }
+  }
+}

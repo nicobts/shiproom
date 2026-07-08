@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiproom — Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F7FA; --panel:#FFFFFF; --ink:#15202F; --ink-soft:#43526A; --ink-faint:#78859B;
+    --rule:#D9E0EA; --rule-strong:#B2BFD0;
+    --invest:#1E6B4F; --invest-bg:#E4F0EA;
+    --ship:#9A6B0B;   --ship-bg:#F6EDD8;
+    --shelve:#9C3B2E; --shelve-bg:#F4E3DF;
+    --abstain:#5C6B82; --abstain-bg:#E7EBF1;
+    --accent:#2E5A8F;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --sans:'Instrument Sans',system-ui,sans-serif;
+    --disp:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important}}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px 96px}
+  a{color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  /* ---------- docket header ---------- */
+  header{padding:56px 0 0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .eyebrow .badge{border:1px solid var(--rule-strong);border-radius:999px;padding:2px 10px;color:var(--ink-soft);background:var(--panel)}
+  .badge.sample{border-color:var(--ship);color:var(--ship);background:var(--ship-bg)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6vw,56px);line-height:1.05;margin:14px 0 8px;letter-spacing:-.01em}
+  .tagline{font-family:var(--disp);font-weight:400;font-style:italic;font-size:clamp(16px,2.4vw,20px);color:var(--ink-soft);max-width:56ch}
+  .meta{margin-top:20px;padding-top:14px;border-top:1px solid var(--rule);display:flex;gap:28px;flex-wrap:wrap;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft)}
+  .meta b{display:block;font-weight:500;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;margin-bottom:2px}
+
+  /* ---------- the bench (signature) ---------- */
+  .bench{margin:44px 0 0}
+  .bench-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  .seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px}
+  .seat{border:none;font:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:0;overflow:hidden;text-align:left;transition:transform .15s ease,box-shadow .15s ease}
+  .seat:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(21,32,47,.12)}
+  .seat .bar{height:56px;position:relative}
+  .seat .bar::after{content:"";position:absolute;inset:auto 0 0 0;height:14px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.28))}
+  .seat .lbl{display:block;padding:7px 9px 8px}
+  .seat .lbl .r{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.06em}
+  .seat .lbl .v{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+  .v-INVEST .bar{background:var(--invest)} .v-INVEST .lbl .v{color:var(--invest)}
+  .v-SHIP_AND_SEE .bar{background:var(--ship)} .v-SHIP_AND_SEE .lbl .v{color:var(--ship)}
+  .v-SHELVE .bar{background:var(--shelve)} .v-SHELVE .lbl .v{color:var(--shelve)}
+  .v-ABSTAIN .bar{background:var(--abstain)} .v-ABSTAIN .lbl .v{color:var(--abstain)}
+
+  /* ---------- verdict banner ---------- */
+  .verdict{margin:36px 0 0;background:var(--ink);color:var(--paper);border-radius:10px;padding:28px 28px 26px;position:relative;overflow:hidden}
+  .verdict::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--vc,var(--ship))}
+  .verdict .k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.65}
+  .verdict h2{font-family:var(--disp);font-weight:600;font-size:clamp(26px,4.4vw,38px);margin:6px 0 12px;letter-spacing:.01em}
+  .verdict .tally{font-family:var(--mono);font-size:12.5px;opacity:.85;margin-bottom:14px}
+  .verdict p{max-width:64ch;font-size:15.5px;opacity:.92}
+
+  /* ---------- sections ---------- */
+  section{margin-top:56px}
+  h3.sec{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:20px;font-weight:500}
+
+  /* filters */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{font:inherit;font-family:var(--mono);font-size:12px;letter-spacing:.04em;border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink-soft);border-radius:999px;padding:5px 14px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+  /* member rows */
+  .member{background:var(--panel);border:1px solid var(--rule);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .member[hidden]{display:none}
+  .member > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px 18px}
+  .member > summary::-webkit-details-marker{display:none}
+  .member > summary:hover{background:#FAFBFD}
+  .m-seat{font-family:var(--mono);font-size:11px;color:var(--ink-faint);min-width:34px}
+  .m-role{font-family:var(--disp);font-weight:600;font-size:19px;flex:1;min-width:0}
+  .m-role small{display:block;font-family:var(--sans);font-weight:400;font-size:12.5px;color:var(--ink-faint);margin-top:1px}
+  .pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .pill.INVEST{background:var(--invest-bg);color:var(--invest)}
+  .pill.SHIP_AND_SEE{background:var(--ship-bg);color:var(--ship)}
+  .pill.SHELVE{background:var(--shelve-bg);color:var(--shelve)}
+  .pill.ABSTAIN{background:var(--abstain-bg);color:var(--abstain)}
+  .caret{color:var(--ink-faint);transition:transform .18s ease;flex:none}
+  details[open] .caret{transform:rotate(90deg)}
+  .m-body{padding:2px 18px 20px;border-top:1px dashed var(--rule)}
+  .m-body p.arg{padding-top:16px;color:var(--ink);max-width:70ch}
+  .kv{margin-top:16px;display:grid;gap:10px}
+  .kv .row{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start}
+  .kv .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);padding-top:3px}
+  .kv .val{font-size:14.5px;color:var(--ink-soft)}
+  .kv .val.mono{font-family:var(--mono);font-size:13px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--ink)}
+  .reacts{margin-top:14px;font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--rule-strong);padding:2px 0 2px 12px;font-style:italic}
+
+  /* full assessment expander */
+  .assessment{margin-top:18px;border-top:1px solid var(--rule);padding-top:4px}
+  .assessment > summary{list-style:none;cursor:pointer;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:8px 0;display:flex;align-items:center;gap:8px}
+  .assessment > summary::-webkit-details-marker{display:none}
+  .assessment > summary::before{content:"›";transition:transform .15s ease;display:inline-block}
+  .assessment[open] > summary::before{transform:rotate(90deg)}
+  .assessment .md{background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;font-size:14.5px;color:var(--ink)}
+  .assessment .md h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:18px 0 8px;font-weight:500}
+  .assessment .md h4:first-child{margin-top:0}
+  .assessment .md p{margin:0 0 10px;max-width:70ch}
+  .assessment .md ul,.assessment .md ol{margin:0 0 12px;padding-left:20px}
+  .assessment .md li{margin-bottom:6px;max-width:66ch}
+  .assessment .md strong{font-weight:600}
+  .assessment .md code{font-family:var(--mono);font-size:12.5px;background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+
+  /* experiment */
+  .exp{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:22px}
+  .exp p.desc{color:var(--ink-soft);max-width:64ch}
+  .exp .deadline{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-top:6px}
+  .thresholds{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .th{border:1px solid var(--rule);border-radius:6px;padding:14px 14px 12px;background:var(--paper)}
+  .th .t{font-family:var(--disp);font-weight:700;font-size:28px;line-height:1}
+  .th .m{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft);margin-top:6px;text-transform:uppercase}
+
+  /* fact base & constraints */
+  ul.plain{list-style:none;display:grid;gap:8px}
+  ul.plain li{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:11px 14px;font-size:14px;color:var(--ink-soft)}
+  ul.plain li .src{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px}
+
+  .disagreement{border-left:4px solid var(--shelve);background:var(--panel);border-radius:0 8px 8px 0;padding:16px 18px;font-size:15px;color:var(--ink-soft);max-width:70ch}
+
+  footer{margin-top:72px;border-top:1px solid var(--rule);padding-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media (max-width:560px){
+    .kv .row{grid-template-columns:1fr}
+    .m-role{font-size:17px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">
+      <span>Shiproom · Record of Deliberation</span>
+      <span class="badge" id="badge-date"></span>
+      <span class="badge sample" id="badge-sample" hidden>Sample data — replace with a real run</span>
+    </div>
+    <h1 id="project"></h1>
+    <p class="tagline" id="tagline"></p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="bench" aria-label="Council votes at a glance">
+    <div class="bench-label">The bench — one seat, one vote</div>
+    <div class="seats" id="seats"></div>
+  </div>
+
+  <div class="verdict" id="verdict">
+    <div class="k">Council verdict</div>
+    <h2 id="decision"></h2>
+    <div class="tally" id="tally"></div>
+    <p id="summary"></p>
+  </div>
+
+  <section id="sec-members">
+    <h3 class="sec">The deliberation — seat by seat</h3>
+    <div class="filters" id="filters" role="group" aria-label="Filter members by vote"></div>
+    <div id="members"></div>
+  </section>
+
+  <section id="sec-exp" hidden>
+    <h3 class="sec">The pre-committed experiment</h3>
+    <div class="exp">
+      <p class="desc" id="exp-desc"></p>
+      <div class="deadline" id="exp-deadline"></div>
+      <div class="thresholds" id="thresholds"></div>
+    </div>
+  </section>
+
+  <section id="sec-grill" hidden>
+    <h3 class="sec">The grill — appeal record</h3>
+    <div class="exp">
+      <p class="desc" id="grill-retally"></p>
+      <div class="kv" id="grill-revisions" style="margin-top:14px"></div>
+      <div id="grill-wounds" style="margin-top:18px"></div>
+    </div>
+  </section>
+
+  <section id="sec-disagreement" hidden>
+    <h3 class="sec">Strongest unresolved disagreement</h3>
+    <div class="disagreement" id="disagreement"></div>
+  </section>
+
+  <section id="sec-facts" hidden>
+    <h3 class="sec">Shared fact base</h3>
+    <ul class="plain" id="facts"></ul>
+  </section>
+
+  <section id="sec-constraints" hidden>
+    <h3 class="sec">Builder constraints (binding)</h3>
+    <ul class="plain" id="constraints"></ul>
+  </section>
+
+  <footer>
+    <span>Verdict by the <a href="https://github.com/nicobts/shiproom">Shiproom</a>, an open protocol by <a href="https://www.linkedin.com/in/nicolas-bossi-26a326b3/">Nicolas</a></span>
+    <span><a href="https://github.com/nicobts/shiproom" style="font-weight:500">Run your own council &rarr;</a></span>
+  </footer>
+</div>
+
+<script>
+/* Embedded sample (fictional illustrative project). A real run drops verdict.json
+   next to this file; it is fetched and replaces the sample when served over HTTP. */
+const SAMPLE = {
+  "project": "Snipvault",
+  "tagline": "A code-snippet manager with team sharing — illustrative sample, fictional project",
+  "date": "2026-07-04",
+  "sample": true,
+  "constraints": [
+    "Solo developer, ~8 hours/week",
+    "Prototype built; no users yet",
+    "Stated goal: turn it into a paid product"
+  ],
+  "factBase": [
+    {
+      "fact": "Snippet management is a crowded category: GitHub Gists is free and ubiquitous; multiple paid incumbents exist in the $5-10/user/mo range",
+      "source": "illustrative example"
+    },
+    {
+      "fact": "Modern editors and AI assistants generate snippets on demand, shrinking the reuse problem the category was built on",
+      "source": "illustrative example"
+    },
+    {
+      "fact": "No incumbent has meaningful team-permission workflows for snippets",
+      "source": "illustrative example — claimed white space"
+    }
+  ],
+  "members": [
+    {
+      "seat": 1,
+      "role": "CTO",
+      "title": "Technical defensibility & maintenance reality",
+      "vote": "SHELVE",
+      "argument": "Nothing here is defensible: a snippet CRUD with sharing is a weekend build for any incumbent, and the claimed white space (team permissions) is a sprint, not a moat. The hidden burden is sync and editor-plugin maintenance across VS Code, JetBrains, and vim — a permanent tax that has ground down better-funded teams in this exact category.",
+      "keyNumber": "~1 sprint for an incumbent to copy the differentiator",
+      "flipCondition": "A technical wedge incumbents structurally can't follow — none is currently proposed",
+      "action": "Before writing more code, list what the incumbents' changelogs shipped in the last year; if team features appear, this is over",
+      "reactsTo": null,
+      "fullAssessment": "## Framing\nI restate the case as: \"should a solo builder spend further weekends on a snippet manager whose differentiator is team sharing?\" The alternative framing — \"is there any technically defensible product in the snippet space at all?\" — matters, because my answer to the second drives the first.\n\n## Analysis\nThe build is a CRUD store, a share/permission layer, and editor plugins. None of it is novel; the permission layer the pitch calls white space is a bounded feature any incumbent ships in one sprint, because the data model (snippet → owner → grantees) is trivial. The genuinely hard part is the one the pitch ignores: editor-plugin maintenance. VS Code, JetBrains, and vim move on independent release cadences; every breakage is a support ticket, and plugin rot is the documented killer of small tools in this category.\n\n## Evidence & assumptions\nFacts: incumbents exist at $5–10/user/mo; GitHub Gists is free (fact base). ESTIMATE: 1 sprint for an incumbent to replicate team permissions — based on the data model's simplicity, not on any incumbent's roadmap. ESTIMATE: plugin maintenance ≈ 2–4 hrs/week once three editors are supported.\n\n## Risks\n1. **Plugin rot** (high): permanent tax that grows with adoption. 2. **Instant copyability** (high): success invites a one-sprint clone. 3. **Sync conflicts** (medium): the first team feature request will be offline sync — a hard problem for no strategic gain.\n\n## What would change my mind\nA wedge incumbents structurally can't follow: e.g., deep integration with a proprietary internal toolchain, or a compliance/governance angle (see CFO). Watch for: incumbents' changelogs shipping team features (kill signal), or enterprise snippet-governance RFPs appearing (revive signal).\n\n## Recommendations\n1. Before any further code, audit the top three incumbents' last 12 months of changelogs; if team features shipped, stop.\n2. If continuing at all, support ONE editor and refuse the other plugins.\n3. Cap total future investment at one weekend (see CEO) and treat the codebase as a portfolio artifact: polish the README over the features."
+    },
+    {
+      "seat": 2,
+      "role": "CFO",
+      "title": "Unit economics",
+      "vote": "SHELVE",
+      "argument": "I agree with the CTO and add the demand-side problem: the price ceiling is anchored by a free incumbent, so realistic ARPU is $5/mo against a shrinking problem. At plausible conversion, reaching even $1K MRR needs thousands of active users acquired in a category with no organic search growth. The hours are worth more elsewhere.",
+      "keyNumber": "$5/mo ceiling × shrinking problem = math that never closes",
+      "flipCondition": "Evidence of teams paying for snippet governance today (procurement, compliance) — a different buyer than developers",
+      "action": "Spend one evening searching for that buyer before spending another on the code",
+      "reactsTo": "Agrees with CTO; adds that even uncopied, the demand math fails",
+      "fullAssessment": "## Framing\nRestated: \"can this reach meaningful revenue inside this builder's constraint envelope?\" Alternative framing — \"is there any buyer for whom snippets are a budget line?\" — is the only version with a non-obvious answer.\n\n## Analysis\nPrice is anchored by a free incumbent (Gists), so realistic ARPU sits at the bottom of the $5–10 band; call it $5/mo blended. $1K MRR therefore needs ~200 paying users; at a 2% free-to-paid conversion that implies ~10,000 actives — in a category with flat-to-declining organic demand, acquired by a solo builder at 8 hrs/week. The months-to-milestone math does not close under any honest assumption. The one exception worth naming: compliance. If any regulated team must govern what code fragments employees share (audit trails, retention), \"snippet governance\" becomes a procurement item at 10–20× the consumer price. I found no evidence this buyer exists; I also can't rule it out from the fact base.\n\n## Evidence & assumptions\nFacts: competitor pricing $5–10/user/mo (fact base). ESTIMATES, all flagged: 2% conversion (industry-typical for OSS-adjacent tools), $5 blended ARPU, 10K actives required. No demand-side data exists in either direction — that absence is itself the finding.\n\n## Risks\n1. **Zero-price anchor** (high): the free incumbent caps willingness to pay permanently. 2. **Shrinking demand** (high): AI assistants dissolve the reuse habit. 3. **Opportunity cost** (high): these are the builder's only 8 hours.\n\n## What would change my mind\nOne procurement-driven buyer: a compliance officer, not a developer, asking for snippet governance. Watch: RFPs, SOC2 tooling lists, security-team forums.\n\n## Recommendations\n1. Spend one evening — not one sprint — searching for the compliance buyer (security forums, RFP databases).\n2. If not found, stop all revenue framing; reclassify as portfolio work.\n3. Never build billing for this."
+    },
+    {
+      "seat": 3,
+      "role": "VC",
+      "title": "Venture shape",
+      "vote": "SHELVE",
+      "argument": "Feature, not company — and a feature of a category whose core problem is being dissolved by AI-generated code. The market isn't just crowded; it's evaporating. Timing is the strongest argument against, not competition.",
+      "keyNumber": "TAM derivative: negative",
+      "flipCondition": "None within this framing; a pivot to AI-context management would be a different council",
+      "action": "If the itch is real, reframe around what AI assistants need (context, not snippets) and re-run the council on that",
+      "reactsTo": "Extends CFO: the demand problem is structural, not just quantitative",
+      "fullAssessment": "## Framing\nRestated: \"is this venture-shaped?\" The alternative framing the builder should sit with: \"what is the terminal size of the best possible outcome?\" — because for this idea, even flawless execution lands small.\n\n## Analysis\nClassification: feature, not company — and a feature of a dissolving category. The core behavior (file a snippet, retrieve it later) is being replaced by a superior substitute: asking an AI assistant, which regenerates the pattern with current context instead of retrieving a stale one. When the substitute is better AND lower-friction, the category doesn't shrink, it evaporates. Timing is therefore the strongest argument against — stronger than competition. The Gists-anchored pricing (CFO) and one-sprint copyability (CTO) are secondary: they describe why winning would be hard; the timing describes why winning would be worthless.\n\n## Evidence & assumptions\nFacts: crowded category, free incumbent, AI-generation trend (fact base). ESTIMATE: category demand trajectory is negative — inferred from substitution logic, not measured; I flag that no seat has usage data, and the ICP's lived behavior (below) is our only demand observation.\n\n## Risks\nFor a hypothetical investor: total — no moat, no growth market, no team leverage. For the builder: only opportunity cost, which the CEO must price.\n\n## What would change my mind\nNothing within this framing. A pivot to what AI assistants actually need — context management, prompt/pattern libraries with team governance — would be a different company in a growing category, and I would want that council run.\n\n## Recommendations\n1. Do not raise, do not bootstrap, do not extend this framing.\n2. Extract the reusable asset: the team-sharing/permissions code is a fine module for a future product.\n3. If the itch persists, re-run the council on the AI-context-management reframing within 30 days — while the interest is warm."
+    },
+    {
+      "seat": 4,
+      "role": "CMO",
+      "title": "Distribution & positioning",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I partially dissent: the deliberation is right about the business, but a polished OSS release costs one weekend and buys a portfolio piece plus list-building in dev communities. Distribution channels exist (r/webdev, HN) even if the paid path doesn't. Ship it as a gift, measure nothing but reach.",
+      "keyNumber": "1 weekend to a shippable OSS release",
+      "flipCondition": "If the launch itself would take more than a weekend, my vote joins the SHELVE column",
+      "action": "Cut every feature that isn't needed for a one-weekend OSS release",
+      "reactsTo": "Disagrees with VC on the conclusion, not the analysis: dead market, but live distribution value",
+      "fullAssessment": "## Framing\nRestated: \"is there any distribution value left in this artifact?\" I accept the bench's business verdict and answer a narrower question than my colleagues — deliberately.\n\n## Analysis\nDead market, live channels. A polished OSS snippet manager still has functioning distribution: r/webdev and HN reward well-made small tools regardless of market size, and \"I built the snippet manager nobody needs\" is, frankly, a better post title than most launches get. The value on the table is not users; it is reach — a portfolio piece, a few hundred stars, an email list of developers who like the builder's craft. That asset transfers to whatever the builder ships next; the market analysis does not diminish it. My dissent from the bench is therefore narrow and priced: one weekend, no more.\n\n## Evidence & assumptions\nFacts: the named channels exist and are free. ESTIMATE: a well-executed small-tool post earns 100–500 stars in this climate — pattern-matched from similar launches, unverified. ESTIMATE: zero conversion from stars to revenue (consistent with CFO).\n\n## Risks\n1. **Scope creep** (high): \"one weekend\" becoming four is the only way my vote turns out wrong. 2. **Reputation dilution** (low): shipping into a dead category reads as craft, not misjudgment, IF the README is self-aware about it.\n\n## What would change my mind\nIf the release cannot fit one weekend, I join the SHELVE column — my vote is conditional on the cap, not the market.\n\n## Recommendations\n1. Cut to a one-weekend release: one editor, no billing, no roadmap section.\n2. Write the README self-aware (\"a love letter to a dying category\") — the honesty IS the marketing.\n3. Put a link to the builder's next project in the footer; that link is the entire ROI."
+    },
+    {
+      "seat": 5,
+      "role": "CEO",
+      "title": "Focus & sequencing",
+      "vote": "SHELVE",
+      "argument": "The CMO's weekend-release is acceptable only as an exit, not a beginning: ship what exists, archive the repo, and reclaim the hours. Any threshold-setting here would be theater — the council should not pretend there's an experiment worth pre-committing to.",
+      "keyNumber": "0 further weekends after the release",
+      "flipCondition": "The CFO's compliance buyer materializing would reopen the case",
+      "action": "One weekend to publish as-is, then archive and move to the next idea",
+      "reactsTo": "Adopts CMO's release as a graceful shutdown, not a launch",
+      "fullAssessment": "## Framing\nRestated: \"what do these 8 hours a week buy, and where should they go?\" Every other framing is a subset of this one.\n\n## Analysis\nThe bench converges: no demand (ICP), no math (CFO), no moat (CTO), no market trajectory (VC), residual distribution value (CMO). My job is to convert that convergence into a resource decision with a hard edge. The CMO's weekend-release is acceptable — but only classified correctly: it is an exit with a souvenir, not a launch with a roadmap. The danger is not the weekend; it is the second weekend, which arrives disguised as a bug report. So the decision needs a mechanism, not a intention: ship, archive, redirect.\n\n## Evidence & assumptions\nAll inherited from prior seats; I add none. The one number I own: 0 further weekends after the release — a decision, not an estimate.\n\n## Risks\n1. **The second weekend** (high): mitigated by archiving the repo, which converts \"maintenance\" into a conscious un-archiving decision. 2. **Sunk-cost pull** (medium): the VC's pivot suggestion is the healthy outlet for it.\n\n## What would change my mind\nThe CFO's compliance buyer materializing with a name and a budget — that reopens the case as a different product at a different price.\n\n## Recommendations\n1. Ship the CMO's one-weekend release, then **archive the repository the same day** — archiving is the commitment device.\n2. Redirect the reclaimed hours to the VC's reframing question within 30 days.\n3. Write the shutdown note in the README (date, reason, what you learned) — it reads as maturity and costs ten minutes.\n4. Reread this verdict before the next 'quick weekend project' in a crowded category."
+    },
+    {
+      "seat": 6,
+      "role": "ICP",
+      "title": "The target user — a working developer",
+      "vote": "SHELVE",
+      "argument": "Honest pain: 2/10. I paste snippets into my AI assistant's chat and it remembers the pattern better than I file it; the last time I opened my snippet manager was months ago. I wouldn't pay, and I wouldn't switch for free.",
+      "keyNumber": "Pain 2/10; willingness to pay: none",
+      "flipCondition": "None — the behavior this product organizes is one I've already stopped doing",
+      "action": "Ask five developer friends when they last opened a snippet manager; believe their answers",
+      "reactsTo": "Confirms VC's evaporation thesis from lived behavior",
+      "fullAssessment": "## Framing\nRestated from where I sit: \"would this change what I do on a Tuesday?\" That is the only framing a user has.\n\n## Analysis\nMy honest Tuesday: I hit a pattern I've solved before, I ask my AI assistant, it regenerates the pattern adapted to the file I'm in. That last part is why retrieval lost — a stored snippet is frozen in the context of the day I saved it; the regenerated one fits today's code. My snippet manager isn't losing to a competitor; it's losing to a better verb. I opened it last sometime months ago, to look for something I then regenerated anyway. Team sharing doesn't change this: my team shares patterns through code review and the assistant's context, not through a library we'd all have to remember to garden.\n\n## Evidence & assumptions\nThis filing IS the evidence — one user's lived behavior, honestly reported. I flag its limits: n=1, and I'm the AI-forward end of the market. A survey of five less AI-adopted colleagues (my recommendation below) would bound how far behind me the median developer is.\n\n## Risks\nFor me as a user: none — I simply won't adopt. That IS the risk, and it belongs to the builder.\n\n## What would change my mind\nNothing in the snippet framing. What I'd actually adopt tomorrow: a *team prompt/context library* — the patterns my team feeds our assistants, versioned and shared. That is the reusable itch under this idea.\n\n## Recommendations\n1. Ask five developer colleagues when they last opened a snippet manager; write the answers down verbatim.\n2. Pay attention to what I said I'd adopt — the context-library reframing overlaps the VC's pivot exactly; two seats arriving there independently is a signal.\n3. Score the pain of THAT idea before building anything."
+    },
+    {
+      "seat": 7,
+      "role": "Chair",
+      "title": "Synthesis",
+      "vote": "SHELVE",
+      "argument": "Tally: SHELVE six, SHIP_AND_SEE one (CMO). The disagreement is narrow — whether the weekend OSS release is worth doing on the way out — and the CEO resolved it by adopting it as the exit. The ICP's 2/10 pain score outranks everything else said here.",
+      "keyNumber": "6–1–0",
+      "flipCondition": "N/A — synthesis seat",
+      "action": "Reread this before the next 'quick weekend project' in a crowded category",
+      "reactsTo": "Synthesis of all seats",
+      "fullAssessment": "## Framing\nNo new arguments; my filing records the shape of the deliberation itself.\n\n## Analysis\nSix seats reached SHELVE through four independent routes — economics (CFO), copyability (CTO), market trajectory (VC), and lived user behavior (ICP) — which is the strongest form of convergence: not one argument repeated, but distinct disciplines arriving at one answer. The single dissent (CMO) is narrow, priced, and conditional, and the CEO absorbed it as an exit mechanism rather than contesting it. Two seats (VC and ICP) independently surfaced the same pivot — AI context/prompt libraries with team governance — without coordinating; per protocol I flag independent convergence on an unrequested idea as the run's most valuable byproduct.\n\n## Evidence & assumptions\nThe deliberation record. One process note: the ICP's n=1 evidence carried decisive weight, consistent with the charter's rule that the customer voice outranks strategy — the bench should confirm it cheaply (the ICP's five-colleague survey) before treating it as settled.\n\n## Risks\nProcess risk only: the builder honoring the verdict for a month and then quietly un-archiving. The CEO's same-day archive mechanism is the mitigation; this filing is the paper trail.\n\n## What would change my mind\nN/A — synthesis seat.\n\n## Recommendations\n1. Execute the CEO's ship-archive-redirect sequence as one motion, not three decisions.\n2. Run the five-colleague survey within two weeks; append the answers to this docket entry.\n3. Bring the context-library reframing back to a fresh council within 30 days — with the ICP seat asked first."
+    }
+  ],
+  "verdict": {
+    "decision": "SHELVE",
+    "summary": "Snipvault is a well-built answer to a question developers have stopped asking. The category is crowded, the price ceiling is free, and the core problem is being dissolved by AI-generated code — the target user rated the pain 2 out of 10. Publish what exists as a one-weekend open-source release, archive it with pride, and spend the reclaimed hours on a problem someone still has.",
+    "disagreement": "CMO vs the bench: is the weekend OSS release a launch or a funeral? Resolved by the CEO — it's a graceful exit, capped at one weekend.",
+    "experiment": {
+      "description": "None pre-committed — the council declines to manufacture an experiment where no live question remains",
+      "deadline": "n/a",
+      "thresholds": []
+    }
+  }
+};
+
+const VOTE_LABEL = {INVEST:'Invest', SHIP_AND_SEE:'Ship & See', SHELVE:'Shelve', ABSTAIN:'Abstain'};
+const VOTE_VAR   = {INVEST:'--invest', SHIP_AND_SEE:'--ship', SHELVE:'--shelve', ABSTAIN:'--abstain'};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* minimal markdown -> HTML for full assessments (escape first, then transform) */
+function mdToHtml(md){
+  const lines = esc(md).split(/\r?\n/);
+  let out = [], list = null, para = [];
+  const flushPara = () => { if (para.length){ out.push('<p>'+inline(para.join(' '))+'</p>'); para = []; } };
+  const flushList = () => { if (list){ out.push(list.tag==='ul'?'<ul>':'<ol>', ...list.items.map(i=>'<li>'+inline(i)+'</li>'), list.tag==='ul'?'</ul>':'</ol>'); list = null; } };
+  const inline = s => s
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+  for (const raw of lines){
+    const l = raw.trim();
+    if (!l){ flushPara(); flushList(); continue; }
+    const hm = l.match(/^#{2,4}\s+(.*)/);
+    if (hm){ flushPara(); flushList(); out.push('<h4>'+inline(hm[1])+'</h4>'); continue; }
+    const ul = l.match(/^[-*]\s+(.*)/);
+    if (ul){ flushPara(); if(!list||list.tag!=='ul'){ flushList(); list={tag:'ul',items:[]}; } list.items.push(ul[1]); continue; }
+    const ol = l.match(/^\d+[.)]\s+(.*)/);
+    if (ol){ flushPara(); if(!list||list.tag!=='ol'){ flushList(); list={tag:'ol',items:[]}; } list.items.push(ol[1]); continue; }
+    flushList(); para.push(l);
+  }
+  flushPara(); flushList();
+  return out.join('');
+}
+
+function render(d){
+  document.title = `Shiproom — ${d.project}`;
+  $('project').textContent = d.project;
+  $('tagline').textContent = d.tagline || '';
+  $('badge-date').textContent = d.date || '';
+  $('badge-sample').hidden = !d.sample;
+
+  const tally = {};
+  d.members.forEach(m => tally[m.vote] = (tally[m.vote]||0)+1);
+
+  $('meta').innerHTML =
+    `<span><b>Seats</b>${d.members.length}</span>` +
+    `<span><b>Protocol</b>council/CHARTER.md</span>` +
+    Object.entries(tally).map(([v,n]) => `<span><b>${esc(VOTE_LABEL[v]||v)}</b>${n} vote${n>1?'s':''}</span>`).join('');
+
+  /* bench */
+  $('seats').innerHTML = d.members.map((m,i) => `
+    <button class="seat v-${esc(m.vote)}" data-target="member-${i}" title="${esc(m.role)} — ${esc(VOTE_LABEL[m.vote]||m.vote)}">
+      <span class="bar"></span>
+      <span class="lbl"><span class="r">${esc(m.role)}</span><span class="v">${esc(VOTE_LABEL[m.vote]||m.vote)}</span></span>
+    </button>`).join('');
+  $('seats').querySelectorAll('.seat').forEach(b => b.addEventListener('click', () => {
+    const el = $(b.dataset.target);
+    el.open = true;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }));
+
+  /* verdict banner */
+  const dec = d.verdict.decision;
+  $('verdict').style.setProperty('--vc', `var(${VOTE_VAR[dec]||'--ship'})`);
+  $('decision').textContent = VOTE_LABEL[dec] || dec;
+  $('tally').textContent = Object.entries(tally).map(([v,n]) => `${VOTE_LABEL[v]||v} ${n}`).join(' · ');
+  $('summary').textContent = d.verdict.summary || '';
+
+  /* filters */
+  const votesPresent = ['ALL', ...Object.keys(tally)];
+  $('filters').innerHTML = votesPresent.map(v =>
+    `<button class="chip" data-v="${esc(v)}" aria-pressed="${v==='ALL'}">${v==='ALL'?'All seats':esc(VOTE_LABEL[v]||v)}</button>`).join('');
+  $('filters').querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    $('filters').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed','false'));
+    c.setAttribute('aria-pressed','true');
+    const v = c.dataset.v;
+    document.querySelectorAll('.member').forEach(m => m.hidden = (v!=='ALL' && m.dataset.vote!==v));
+  }));
+
+  /* members */
+  $('members').innerHTML = d.members.map((m,i) => `
+    <details class="member" id="member-${i}" data-vote="${esc(m.vote)}" ${i===d.members.length-1?'open':''}>
+      <summary>
+        <span class="m-seat">${String(m.seat).padStart(2,'0')}</span>
+        <span class="m-role">${esc(m.role)}${m.title?`<small>${esc(m.title)}</small>`:''}</span>
+        <span class="pill ${esc(m.vote)}">${esc(VOTE_LABEL[m.vote]||m.vote)}</span>
+        <svg class="caret" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="m-body">
+        <p class="arg">${esc(m.argument)}</p>
+        ${m.reactsTo ? `<div class="reacts">↳ ${esc(m.reactsTo)}</div>` : ''}
+        <div class="kv">
+          ${m.keyNumber ? `<div class="row"><span class="k">Key number</span><span class="val mono">${esc(m.keyNumber)}</span></div>` : ''}
+          <div class="row"><span class="k">Flip condition</span><span class="val mono">${esc(m.flipCondition)}</span></div>
+          <div class="row"><span class="k">One action</span><span class="val">${esc(m.action)}</span></div>
+        </div>
+        ${m.fullAssessment ? `<details class="assessment"><summary>Read the full assessment — ${esc(m.role)}'s complete filing</summary><div class="md">${mdToHtml(m.fullAssessment)}</div></details>` : ''}
+      </div>
+    </details>`).join('');
+
+  /* experiment */
+  const exp = d.verdict.experiment;
+  if (exp){
+    $('sec-exp').hidden = false;
+    $('exp-desc').textContent = exp.description || '';
+    $('exp-deadline').textContent = exp.deadline ? `Decision deadline: ${exp.deadline}` : '';
+    $('thresholds').innerHTML = (exp.thresholds||[]).map(t =>
+      `<div class="th"><div class="t">${esc(t.target)}</div><div class="m">${esc(t.metric)}</div></div>`).join('');
+  }
+
+  /* grill / appeal */
+  const g = d.grill;
+  if (g){
+    $('sec-grill').hidden = false;
+    $('grill-retally').textContent = g.retally
+      ? `Re-tally after interrogation: ${g.retally} — final decision ${VOTE_LABEL[g.finalDecision]||g.finalDecision}.`
+      : `Interrogation run (${g.mode}); final decision ${VOTE_LABEL[g.finalDecision]||g.finalDecision}.`;
+    $('grill-revisions').innerHTML = (g.revisedVotes||[]).map(r =>
+      `<div class="row"><span class="k">${esc(r.role)} revised</span><span class="val">${esc(VOTE_LABEL[r.from]||r.from)} → <strong>${esc(VOTE_LABEL[r.to]||r.to)}</strong> — ${esc(r.because)}</span></div>`).join('')
+      || `<div class="row"><span class="k">Revisions</span><span class="val">All votes stood.</span></div>`;
+    $('grill-wounds').innerHTML = (g.openWounds||[]).length
+      ? `<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--shelve);margin-bottom:8px">Open wounds — asked twice, not answered</div>` +
+        (g.openWounds).map(w => `<div class="val mono" style="font-family:var(--mono);font-size:13px;background:var(--shelve-bg);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--shelve);margin-bottom:6px">${esc(w)}</div>`).join('')
+      : `<div style="font-family:var(--mono);font-size:12px;color:var(--ink-faint)">No open wounds — every question was answered or honestly conceded.</div>`;
+  }
+
+  if (d.verdict.disagreement){ $('sec-disagreement').hidden = false; $('disagreement').textContent = d.verdict.disagreement; }
+  if (d.factBase?.length){
+    $('sec-facts').hidden = false;
+    $('facts').innerHTML = d.factBase.map(f => `<li>${esc(f.fact)}${f.source?`<span class="src">source: ${esc(f.source)}</span>`:''}</li>`).join('');
+  }
+  if (d.constraints?.length){
+    $('sec-constraints').hidden = false;
+    $('constraints').innerHTML = d.constraints.map(c => `<li>${esc(c)}</li>`).join('');
+  }
+}
+
+(async () => {
+  let data = SAMPLE;
+  try {
+    const r = await fetch('verdict.json', {cache:'no-store'});
+    if (r.ok) data = await r.json();
+  } catch(_) { /* file:// or no verdict.json — use embedded sample */ }
+  if (data) render(data);
+})();
+</script>
+</body>
+</html>

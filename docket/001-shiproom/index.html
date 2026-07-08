@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiproom — Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F7FA; --panel:#FFFFFF; --ink:#15202F; --ink-soft:#43526A; --ink-faint:#78859B;
+    --rule:#D9E0EA; --rule-strong:#B2BFD0;
+    --invest:#1E6B4F; --invest-bg:#E4F0EA;
+    --ship:#9A6B0B;   --ship-bg:#F6EDD8;
+    --shelve:#9C3B2E; --shelve-bg:#F4E3DF;
+    --abstain:#5C6B82; --abstain-bg:#E7EBF1;
+    --accent:#2E5A8F;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --sans:'Instrument Sans',system-ui,sans-serif;
+    --disp:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important}}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px 96px}
+  a{color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  /* ---------- docket header ---------- */
+  header{padding:56px 0 0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .eyebrow .badge{border:1px solid var(--rule-strong);border-radius:999px;padding:2px 10px;color:var(--ink-soft);background:var(--panel)}
+  .badge.sample{border-color:var(--ship);color:var(--ship);background:var(--ship-bg)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6vw,56px);line-height:1.05;margin:14px 0 8px;letter-spacing:-.01em}
+  .tagline{font-family:var(--disp);font-weight:400;font-style:italic;font-size:clamp(16px,2.4vw,20px);color:var(--ink-soft);max-width:56ch}
+  .meta{margin-top:20px;padding-top:14px;border-top:1px solid var(--rule);display:flex;gap:28px;flex-wrap:wrap;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft)}
+  .meta b{display:block;font-weight:500;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;margin-bottom:2px}
+
+  /* ---------- the bench (signature) ---------- */
+  .bench{margin:44px 0 0}
+  .bench-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  .seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px}
+  .seat{border:none;font:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:0;overflow:hidden;text-align:left;transition:transform .15s ease,box-shadow .15s ease}
+  .seat:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(21,32,47,.12)}
+  .seat .bar{height:56px;position:relative}
+  .seat .bar::after{content:"";position:absolute;inset:auto 0 0 0;height:14px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.28))}
+  .seat .lbl{display:block;padding:7px 9px 8px}
+  .seat .lbl .r{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.06em}
+  .seat .lbl .v{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+  .v-INVEST .bar{background:var(--invest)} .v-INVEST .lbl .v{color:var(--invest)}
+  .v-SHIP_AND_SEE .bar{background:var(--ship)} .v-SHIP_AND_SEE .lbl .v{color:var(--ship)}
+  .v-SHELVE .bar{background:var(--shelve)} .v-SHELVE .lbl .v{color:var(--shelve)}
+  .v-ABSTAIN .bar{background:var(--abstain)} .v-ABSTAIN .lbl .v{color:var(--abstain)}
+
+  /* ---------- verdict banner ---------- */
+  .verdict{margin:36px 0 0;background:var(--ink);color:var(--paper);border-radius:10px;padding:28px 28px 26px;position:relative;overflow:hidden}
+  .verdict::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--vc,var(--ship))}
+  .verdict .k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.65}
+  .verdict h2{font-family:var(--disp);font-weight:600;font-size:clamp(26px,4.4vw,38px);margin:6px 0 12px;letter-spacing:.01em}
+  .verdict .tally{font-family:var(--mono);font-size:12.5px;opacity:.85;margin-bottom:14px}
+  .verdict p{max-width:64ch;font-size:15.5px;opacity:.92}
+
+  /* ---------- sections ---------- */
+  section{margin-top:56px}
+  h3.sec{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:20px;font-weight:500}
+
+  /* filters */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{font:inherit;font-family:var(--mono);font-size:12px;letter-spacing:.04em;border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink-soft);border-radius:999px;padding:5px 14px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+  /* member rows */
+  .member{background:var(--panel);border:1px solid var(--rule);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .member[hidden]{display:none}
+  .member > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px 18px}
+  .member > summary::-webkit-details-marker{display:none}
+  .member > summary:hover{background:#FAFBFD}
+  .m-seat{font-family:var(--mono);font-size:11px;color:var(--ink-faint);min-width:34px}
+  .m-role{font-family:var(--disp);font-weight:600;font-size:19px;flex:1;min-width:0}
+  .m-role small{display:block;font-family:var(--sans);font-weight:400;font-size:12.5px;color:var(--ink-faint);margin-top:1px}
+  .pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .pill.INVEST{background:var(--invest-bg);color:var(--invest)}
+  .pill.SHIP_AND_SEE{background:var(--ship-bg);color:var(--ship)}
+  .pill.SHELVE{background:var(--shelve-bg);color:var(--shelve)}
+  .pill.ABSTAIN{background:var(--abstain-bg);color:var(--abstain)}
+  .caret{color:var(--ink-faint);transition:transform .18s ease;flex:none}
+  details[open] .caret{transform:rotate(90deg)}
+  .m-body{padding:2px 18px 20px;border-top:1px dashed var(--rule)}
+  .m-body p.arg{padding-top:16px;color:var(--ink);max-width:70ch}
+  .kv{margin-top:16px;display:grid;gap:10px}
+  .kv .row{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start}
+  .kv .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);padding-top:3px}
+  .kv .val{font-size:14.5px;color:var(--ink-soft)}
+  .kv .val.mono{font-family:var(--mono);font-size:13px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--ink)}
+  .reacts{margin-top:14px;font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--rule-strong);padding:2px 0 2px 12px;font-style:italic}
+
+  /* full assessment expander */
+  .assessment{margin-top:18px;border-top:1px solid var(--rule);padding-top:4px}
+  .assessment > summary{list-style:none;cursor:pointer;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:8px 0;display:flex;align-items:center;gap:8px}
+  .assessment > summary::-webkit-details-marker{display:none}
+  .assessment > summary::before{content:"›";transition:transform .15s ease;display:inline-block}
+  .assessment[open] > summary::before{transform:rotate(90deg)}
+  .assessment .md{background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;font-size:14.5px;color:var(--ink)}
+  .assessment .md h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:18px 0 8px;font-weight:500}
+  .assessment .md h4:first-child{margin-top:0}
+  .assessment .md p{margin:0 0 10px;max-width:70ch}
+  .assessment .md ul,.assessment .md ol{margin:0 0 12px;padding-left:20px}
+  .assessment .md li{margin-bottom:6px;max-width:66ch}
+  .assessment .md strong{font-weight:600}
+  .assessment .md code{font-family:var(--mono);font-size:12.5px;background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+
+  /* experiment */
+  .exp{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:22px}
+  .exp p.desc{color:var(--ink-soft);max-width:64ch}
+  .exp .deadline{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-top:6px}
+  .thresholds{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .th{border:1px solid var(--rule);border-radius:6px;padding:14px 14px 12px;background:var(--paper)}
+  .th .t{font-family:var(--disp);font-weight:700;font-size:28px;line-height:1}
+  .th .m{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft);margin-top:6px;text-transform:uppercase}
+
+  /* fact base & constraints */
+  ul.plain{list-style:none;display:grid;gap:8px}
+  ul.plain li{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:11px 14px;font-size:14px;color:var(--ink-soft)}
+  ul.plain li .src{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:3px}
+
+  .disagreement{border-left:4px solid var(--shelve);background:var(--panel);border-radius:0 8px 8px 0;padding:16px 18px;font-size:15px;color:var(--ink-soft);max-width:70ch}
+
+  footer{margin-top:72px;border-top:1px solid var(--rule);padding-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media (max-width:560px){
+    .kv .row{grid-template-columns:1fr}
+    .m-role{font-size:17px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">
+      <span>Shiproom · Record of Deliberation</span>
+      <span class="badge" id="badge-date"></span>
+      <span class="badge sample" id="badge-sample" hidden>Sample data — replace with a real run</span>
+    </div>
+    <h1 id="project"></h1>
+    <p class="tagline" id="tagline"></p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="bench" aria-label="Council votes at a glance">
+    <div class="bench-label">The bench — one seat, one vote</div>
+    <div class="seats" id="seats"></div>
+  </div>
+
+  <div class="verdict" id="verdict">
+    <div class="k">Council verdict</div>
+    <h2 id="decision"></h2>
+    <div class="tally" id="tally"></div>
+    <p id="summary"></p>
+  </div>
+
+  <section id="sec-members">
+    <h3 class="sec">The deliberation — seat by seat</h3>
+    <div class="filters" id="filters" role="group" aria-label="Filter members by vote"></div>
+    <div id="members"></div>
+  </section>
+
+  <section id="sec-exp" hidden>
+    <h3 class="sec">The pre-committed experiment</h3>
+    <div class="exp">
+      <p class="desc" id="exp-desc"></p>
+      <div class="deadline" id="exp-deadline"></div>
+      <div class="thresholds" id="thresholds"></div>
+    </div>
+  </section>
+
+  <section id="sec-grill" hidden>
+    <h3 class="sec">The grill — appeal record</h3>
+    <div class="exp">
+      <p class="desc" id="grill-retally"></p>
+      <div class="kv" id="grill-revisions" style="margin-top:14px"></div>
+      <div id="grill-wounds" style="margin-top:18px"></div>
+    </div>
+  </section>
+
+  <section id="sec-disagreement" hidden>
+    <h3 class="sec">Strongest unresolved disagreement</h3>
+    <div class="disagreement" id="disagreement"></div>
+  </section>
+
+  <section id="sec-facts" hidden>
+    <h3 class="sec">Shared fact base</h3>
+    <ul class="plain" id="facts"></ul>
+  </section>
+
+  <section id="sec-constraints" hidden>
+    <h3 class="sec">Builder constraints (binding)</h3>
+    <ul class="plain" id="constraints"></ul>
+  </section>
+
+  <footer>
+    <span>Verdict by the <a href="https://github.com/nicobts/shiproom">Shiproom</a>, an open protocol by <a href="https://www.linkedin.com/in/nicolas-bossi-26a326b3/">Nicolas</a></span>
+    <span><a href="https://github.com/nicobts/shiproom" style="font-weight:500">Run your own council &rarr;</a></span>
+  </footer>
+</div>
+
+<script>
+/* Embedded sample (fictional illustrative project). A real run drops verdict.json
+   next to this file; it is fetched and replaces the sample when served over HTTP. */
+const SAMPLE = {
+  "project": "Shiproom",
+  "tagline": "The AI council that won't tell you your idea is great \u2014 judged by itself",
+  "date": "2026-07-04",
+  "sample": false,
+  "runner": "Claude (Anthropic), run conversationally per council/CHARTER.md; first entry in the Docket",
+  "constraints": [
+    "Solo builder, nights & weekends, limited hours",
+    "The builder's primary project is in flight with its own pending launch that must not slip",
+    "Stated goal: community visibility and credibility, explicitly not revenue"
+  ],
+  "factBase": [
+    {
+      "fact": "AGENTS.md is the cross-tool agent-instruction standard: Linux Foundation-stewarded, read by 25+ tools, adopted in 60,000+ open-source repos",
+      "source": "agents.md; codex.danielvaughan.com, May 2026"
+    },
+    {
+      "fact": "PRPM registry hosts 7,000+ cross-format agent-guidance packages \u2014 an existing passive distribution channel",
+      "source": "prpm.dev, 2025"
+    },
+    {
+      "fact": "LLM sycophancy (models agreeing with and flattering users) is documented in research and a running joke in builder communities",
+      "source": "LLM alignment literature; community observation"
+    },
+    {
+      "fact": "Spec-driven development (OpenSpec, Spec Kit) is an established movement the protocol can position as the step before",
+      "source": "openspec.dev; morphllm.com guide, 2026"
+    },
+    {
+      "fact": "Most prompt-framework repos plateau at low double-digit stars and die quietly",
+      "source": "ESTIMATE \u2014 unverified, directionally accepted by all seats"
+    }
+  ],
+  "members": [
+    {
+      "seat": 1,
+      "role": "CTO",
+      "title": "Technical defensibility & maintenance reality",
+      "vote": "SHIP_AND_SEE",
+      "argument": "The moat is exactly zero and I won't dress that up: the entire product is markdown plus one HTML file, and a competent copier reproduces it in under an hour. The compensating facts: there is also zero operational burden \u2014 no servers, no abuse surface, no on-call \u2014 so the maintenance tax reduces to PR review plus one real risk nobody has named yet: prompt rot. The protocol's bite depends on models actually obeying adversarial ground rules, and that compliance drifts with every model release; without a regression check, the council silently degrades back into flattery and the brand dies of the exact disease it claims to cure.",
+      "keyNumber": "<1 hour to copy the entire product; 0 infrastructure to run it",
+      "flipCondition": "Evidence the share loop builds a recognized brand (the one asset a copier cannot clone in an hour) would move me to INVEST",
+      "action": "Build a drift canary: a fixture project with a known honest verdict, re-run against each new model release; unanimous cheerfulness fails the build",
+      "reactsTo": null
+    },
+    {
+      "seat": 2,
+      "role": "CFO",
+      "title": "Unit economics & return on hours",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I agree with the CTO that the moat is zero, and I rule it irrelevant: this is not a business, it is a reputation asset, and its P&L is denominated in credibility, not dollars. The cost side is unusually clean \u2014 roughly two part-time weeks to launch-ready, near-zero marginal cost after \u2014 while the return is an asymmetric bet: a hard floor (a good portfolio piece exists regardless) and an uncapped ceiling (one front-page moment compounds into an audience for everything the builder ships next). The only real liability on this balance sheet is schedule risk: every day this project runs past its box is a day taken from the builder's primary project, the asset with actual revenue potential.",
+      "keyNumber": "~2 part-time weeks = the entire downside; the timebox IS the risk control",
+      "flipCondition": "Clearing 1,000 stars or an equivalent distribution event would justify promoting this to INVEST (ongoing maintained project)",
+      "action": "Write both launch dates \u2014 council and primary project \u2014 in the calendar today, before any more code",
+      "reactsTo": "Agrees with CTO that the moat is zero; disagrees that it matters \u2014 reputation assets are defended by recognition, not code"
+    },
+    {
+      "seat": 3,
+      "role": "VC",
+      "title": "Venture shape & investability",
+      "vote": "SHELVE",
+      "argument": "As an investment, this is a SHELVE and I will not launder the vocabulary to avoid saying so: no revenue mechanism, no retention surface, no moat, and by explicit design no path to any of the three. I disagree with the CFO's framing that reputation returns make this 'investable' \u2014 that stretches my mandate until it means nothing; credibility is real value but it is not an asset class I can price. I also flag a protocol defect this very run exposes: the verdict vocabulary strains when the project isn't a business \u2014 'INVEST' here means hours, not capital \u2014 which is an argument for the scoping layer that assigns each case a fitting verdict set. My dissent is the system working: if this council could not produce a SHELVE against its own creator, it would be worthless.",
+      "keyNumber": "$0 revenue potential \u2014 by design, permanently",
+      "flipCondition": "A hosted verdict gallery with meaningful recurring traffic would make this a top-of-funnel asset attached to something monetizable \u2014 then we can talk",
+      "action": "Decide now what the credibility is FOR; an audience without a product to point it at depreciates fast",
+      "reactsTo": "Disagrees with CFO: reputation is real value but not an investable return; refusing to stretch the mandate is the point of having mandates"
+    },
+    {
+      "seat": 4,
+      "role": "CMO",
+      "title": "Distribution & positioning",
+      "vote": "INVEST",
+      "argument": "I disagree with the VC's frame entirely: distribution assets are judged by reach, not revenue, and this one has all three virality ingredients at once \u2014 a universally felt pain (sycophancy is memed daily in every builder community), a shareable artifact with a visual signature (the bench + verdict reads like a Wordle square for founders), and a meta launch story (the council judging itself, which is this very document). My kill case, stated first as required: the prompt-framework graveyard is vast because text-only repos give people nothing to screenshot \u2014 so the dashboard and share card are not polish, they are the entire differentiation, and launching without the auto-generated share image throws away most of the loop. The falsifiable claim I stake my vote on: the side-by-side screenshot (naive flattery vs. council verdict) will outperform every sentence of copy we write.",
+      "keyNumber": "3 virality ingredients present; 1 screenshot carries the launch",
+      "flipCondition": "If a small pre-launch test of the self-verdict screenshot (one tweet, one Discord drop) produces no organic pull, I downgrade to SHIP_AND_SEE",
+      "action": "Build the OG share-card generator before anything else in the kit \u2014 every shared verdict must unfurl beautifully or the loop leaks",
+      "reactsTo": "Disagrees with VC: reach is the correct denominator for a distribution asset; revenue was never the claim"
+    },
+    {
+      "seat": 5,
+      "role": "CEO",
+      "title": "Focus & sequencing",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I adopt the CFO's timebox as the governing constraint and I partially adopt the VC's complaint as a product decision: the verdict-vocabulary strain is real, so the v0.2 scoping layer ships only what fits inside the box \u2014 the Clerk and per-template verdict sets \u2014 and every additional template beyond the launch minimum is killed until after both launches. The one bet: council launches first (universal appeal, zero infrastructure risk, manufactures the audience), the builder's primary project follows four weeks later and inherits that audience. Sequencing is the entire risk here; the tool is cheap, the calendar is not.",
+      "keyNumber": "2-week build box; 4-week gap between launches; both dates fixed today",
+      "flipCondition": "The pre-committed thresholds below \u2014 clearing them promotes this to INVEST, missing all of them means the repo goes to maintenance mode the same week",
+      "action": "Assemble the launch kit this week: self-verdict published, share card, README hero, Show HN draft \u2014 nothing else",
+      "reactsTo": "Endorses CFO's timebox as the risk control; converts VC's vocabulary objection into the v0.2 scope cut-line"
+    },
+    {
+      "seat": 6,
+      "role": "ICP",
+      "title": "The target user's reality check \u2014 a builder mid-project",
+      "vote": "SHIP_AND_SEE",
+      "argument": "I'm a builder who just pitched an idea to my coding agent and got 'that's a great idea!' back. Honest pain: 6/10 \u2014 I know the flattery is empty, but my current workaround is typing 'now argue against it,' and I believe that's sufficient even though it isn't (the single devil's-advocate persona collapses back into agreement within two turns; I just haven't noticed). Here is where I half-disagree with the CMO: the screenshot absolutely gets my click, but the clone loses me \u2014 I will not `git clone` a repo to ask a question, ever; I WILL paste one file or reference one URL. Give me a single self-contained SHIPROOM.md and I'll use it the same minute I see the screenshot; make me install something and I'll star the repo, feel virtuous, and never run it. And yes \u2014 I would gleefully share my own SHELVE verdict; getting roasted well is a badge in my community.",
+      "keyNumber": "Pain 6/10; willingness to install: near zero; willingness to paste one file: high",
+      "flipCondition": "A zero-install one-paste mode existing is the difference between 'nice repo' and 'thing I actually ran'",
+      "action": "Ship the one-file council as the primary CTA; the repo is for contributors, the file is for users",
+      "reactsTo": "Half-disagrees with CMO: the share loop gets the click, but clone friction kills the conversion \u2014 the loop needs a zero-install landing step"
+    },
+    {
+      "seat": 7,
+      "role": "Chair",
+      "title": "Synthesis",
+      "vote": "SHIP_AND_SEE",
+      "argument": "Tally: SHIP_AND_SEE five, INVEST one (CMO), SHELVE one (VC) \u2014 5\u20131\u20131, and the split is the healthiest possible outcome for a tool whose brand is refusing unanimity. The strongest unresolved disagreement is VC vs CFO/CMO on whether reputation is an investable return; the CEO's timebox resolves it operationally by capping the downside and letting the upside be discovered rather than argued. Two seat contributions are adopted as launch requirements, not suggestions: the ICP's zero-install one-file mode, and the CTO's drift canary \u2014 the first protects adoption, the second protects the brand's honesty, and this tool has nothing else worth protecting.",
+      "keyNumber": "5\u20131\u20131",
+      "flipCondition": "N/A \u2014 synthesis seat",
+      "action": "Publish this verdict unedited as Docket entry #001; reread it at the three-week mark and act on the thresholds without renegotiation",
+      "reactsTo": "Synthesis of all seats"
+    }
+  ],
+  "verdict": {
+    "decision": "SHIP_AND_SEE",
+    "summary": "Shiproom is a reputation asset, not a business, and it should be launched exactly like one: fast, timeboxed, and led by its most shareable artifact \u2014 this verdict. The moat is zero, the cost is two part-time weeks, and the upside is the audience every future project inherits; the only real risk is the calendar, so both launch dates get fixed today. Ship it, measure three weeks, and let the thresholds \u2014 not the enthusiasm \u2014 decide whether it graduates to a maintained project.",
+    "disagreement": "VC vs CFO/CMO: is reputation an investable return or a category error? Resolved operationally, not philosophically \u2014 the timebox caps the downside, the thresholds price the upside, and the VC's dissent stays on the record as proof the council can rule against its own creator.",
+    "experiment": {
+      "description": "Public launch of the repo led by this self-verdict: one-file SHIPROOM.md as primary CTA, share card on every verdict, Show HN + Product Hunt + agent-ecosystem registries (PRPM, awesome lists)",
+      "deadline": "3 weeks after launch day; launch day within 2 weeks of this verdict",
+      "thresholds": [
+        {
+          "metric": "GitHub stars",
+          "target": "500"
+        },
+        {
+          "metric": "HN front page or PH top 10",
+          "target": "1 of 2"
+        },
+        {
+          "metric": "External seat/template PRs",
+          "target": "3"
+        },
+        {
+          "metric": "Published Docket verdicts by others",
+          "target": "10"
+        }
+      ]
+    }
+  }
+};
+
+const VOTE_LABEL = {INVEST:'Invest', SHIP_AND_SEE:'Ship & See', SHELVE:'Shelve', ABSTAIN:'Abstain'};
+const VOTE_VAR   = {INVEST:'--invest', SHIP_AND_SEE:'--ship', SHELVE:'--shelve', ABSTAIN:'--abstain'};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* minimal markdown -> HTML for full assessments (escape first, then transform) */
+function mdToHtml(md){
+  const lines = esc(md).split(/\r?\n/);
+  let out = [], list = null, para = [];
+  const flushPara = () => { if (para.length){ out.push('<p>'+inline(para.join(' '))+'</p>'); para = []; } };
+  const flushList = () => { if (list){ out.push(list.tag==='ul'?'<ul>':'<ol>', ...list.items.map(i=>'<li>'+inline(i)+'</li>'), list.tag==='ul'?'</ul>':'</ol>'); list = null; } };
+  const inline = s => s
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+  for (const raw of lines){
+    const l = raw.trim();
+    if (!l){ flushPara(); flushList(); continue; }
+    const hm = l.match(/^#{2,4}\s+(.*)/);
+    if (hm){ flushPara(); flushList(); out.push('<h4>'+inline(hm[1])+'</h4>'); continue; }
+    const ul = l.match(/^[-*]\s+(.*)/);
+    if (ul){ flushPara(); if(!list||list.tag!=='ul'){ flushList(); list={tag:'ul',items:[]}; } list.items.push(ul[1]); continue; }
+    const ol = l.match(/^\d+[.)]\s+(.*)/);
+    if (ol){ flushPara(); if(!list||list.tag!=='ol'){ flushList(); list={tag:'ol',items:[]}; } list.items.push(ol[1]); continue; }
+    flushList(); para.push(l);
+  }
+  flushPara(); flushList();
+  return out.join('');
+}
+
+function render(d){
+  document.title = `Shiproom — ${d.project}`;
+  $('project').textContent = d.project;
+  $('tagline').textContent = d.tagline || '';
+  $('badge-date').textContent = d.date || '';
+  $('badge-sample').hidden = !d.sample;
+
+  const tally = {};
+  d.members.forEach(m => tally[m.vote] = (tally[m.vote]||0)+1);
+
+  $('meta').innerHTML =
+    `<span><b>Seats</b>${d.members.length}</span>` +
+    `<span><b>Protocol</b>council/CHARTER.md</span>` +
+    Object.entries(tally).map(([v,n]) => `<span><b>${esc(VOTE_LABEL[v]||v)}</b>${n} vote${n>1?'s':''}</span>`).join('');
+
+  /* bench */
+  $('seats').innerHTML = d.members.map((m,i) => `
+    <button class="seat v-${esc(m.vote)}" data-target="member-${i}" title="${esc(m.role)} — ${esc(VOTE_LABEL[m.vote]||m.vote)}">
+      <span class="bar"></span>
+      <span class="lbl"><span class="r">${esc(m.role)}</span><span class="v">${esc(VOTE_LABEL[m.vote]||m.vote)}</span></span>
+    </button>`).join('');
+  $('seats').querySelectorAll('.seat').forEach(b => b.addEventListener('click', () => {
+    const el = $(b.dataset.target);
+    el.open = true;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }));
+
+  /* verdict banner */
+  const dec = d.verdict.decision;
+  $('verdict').style.setProperty('--vc', `var(${VOTE_VAR[dec]||'--ship'})`);
+  $('decision').textContent = VOTE_LABEL[dec] || dec;
+  $('tally').textContent = Object.entries(tally).map(([v,n]) => `${VOTE_LABEL[v]||v} ${n}`).join(' · ');
+  $('summary').textContent = d.verdict.summary || '';
+
+  /* filters */
+  const votesPresent = ['ALL', ...Object.keys(tally)];
+  $('filters').innerHTML = votesPresent.map(v =>
+    `<button class="chip" data-v="${esc(v)}" aria-pressed="${v==='ALL'}">${v==='ALL'?'All seats':esc(VOTE_LABEL[v]||v)}</button>`).join('');
+  $('filters').querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    $('filters').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed','false'));
+    c.setAttribute('aria-pressed','true');
+    const v = c.dataset.v;
+    document.querySelectorAll('.member').forEach(m => m.hidden = (v!=='ALL' && m.dataset.vote!==v));
+  }));
+
+  /* members */
+  $('members').innerHTML = d.members.map((m,i) => `
+    <details class="member" id="member-${i}" data-vote="${esc(m.vote)}" ${i===d.members.length-1?'open':''}>
+      <summary>
+        <span class="m-seat">${String(m.seat).padStart(2,'0')}</span>
+        <span class="m-role">${esc(m.role)}${m.title?`<small>${esc(m.title)}</small>`:''}</span>
+        <span class="pill ${esc(m.vote)}">${esc(VOTE_LABEL[m.vote]||m.vote)}</span>
+        <svg class="caret" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="m-body">
+        <p class="arg">${esc(m.argument)}</p>
+        ${m.reactsTo ? `<div class="reacts">↳ ${esc(m.reactsTo)}</div>` : ''}
+        <div class="kv">
+          ${m.keyNumber ? `<div class="row"><span class="k">Key number</span><span class="val mono">${esc(m.keyNumber)}</span></div>` : ''}
+          <div class="row"><span class="k">Flip condition</span><span class="val mono">${esc(m.flipCondition)}</span></div>
+          <div class="row"><span class="k">One action</span><span class="val">${esc(m.action)}</span></div>
+        </div>
+        ${m.fullAssessment ? `<details class="assessment"><summary>Read the full assessment — ${esc(m.role)}'s complete filing</summary><div class="md">${mdToHtml(m.fullAssessment)}</div></details>` : ''}
+      </div>
+    </details>`).join('');
+
+  /* experiment */
+  const exp = d.verdict.experiment;
+  if (exp){
+    $('sec-exp').hidden = false;
+    $('exp-desc').textContent = exp.description || '';
+    $('exp-deadline').textContent = exp.deadline ? `Decision deadline: ${exp.deadline}` : '';
+    $('thresholds').innerHTML = (exp.thresholds||[]).map(t =>
+      `<div class="th"><div class="t">${esc(t.target)}</div><div class="m">${esc(t.metric)}</div></div>`).join('');
+  }
+
+  /* grill / appeal */
+  const g = d.grill;
+  if (g){
+    $('sec-grill').hidden = false;
+    $('grill-retally').textContent = g.retally
+      ? `Re-tally after interrogation: ${g.retally} — final decision ${VOTE_LABEL[g.finalDecision]||g.finalDecision}.`
+      : `Interrogation run (${g.mode}); final decision ${VOTE_LABEL[g.finalDecision]||g.finalDecision}.`;
+    $('grill-revisions').innerHTML = (g.revisedVotes||[]).map(r =>
+      `<div class="row"><span class="k">${esc(r.role)} revised</span><span class="val">${esc(VOTE_LABEL[r.from]||r.from)} → <strong>${esc(VOTE_LABEL[r.to]||r.to)}</strong> — ${esc(r.because)}</span></div>`).join('')
+      || `<div class="row"><span class="k">Revisions</span><span class="val">All votes stood.</span></div>`;
+    $('grill-wounds').innerHTML = (g.openWounds||[]).length
+      ? `<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--shelve);margin-bottom:8px">Open wounds — asked twice, not answered</div>` +
+        (g.openWounds).map(w => `<div class="val mono" style="font-family:var(--mono);font-size:13px;background:var(--shelve-bg);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--shelve);margin-bottom:6px">${esc(w)}</div>`).join('')
+      : `<div style="font-family:var(--mono);font-size:12px;color:var(--ink-faint)">No open wounds — every question was answered or honestly conceded.</div>`;
+  }
+
+  if (d.verdict.disagreement){ $('sec-disagreement').hidden = false; $('disagreement').textContent = d.verdict.disagreement; }
+  if (d.factBase?.length){
+    $('sec-facts').hidden = false;
+    $('facts').innerHTML = d.factBase.map(f => `<li>${esc(f.fact)}${f.source?`<span class="src">source: ${esc(f.source)}</span>`:''}</li>`).join('');
+  }
+  if (d.constraints?.length){
+    $('sec-constraints').hidden = false;
+    $('constraints').innerHTML = d.constraints.map(c => `<li>${esc(c)}</li>`).join('');
+  }
+}
+
+(async () => {
+  let data = SAMPLE;
+  try {
+    const r = await fetch('verdict.json', {cache:'no-store'});
+    if (r.ok) data = await r.json();
+  } catch(_) { /* file:// or no verdict.json — use embedded sample */ }
+  if (data) render(data);
+})();
+</script>
+</body>
+</html>
