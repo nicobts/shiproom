@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiproom — the go/no-go room for your idea</title>
+<meta name="description" content="An adversarial AI council — CTO, CFO, VC, CMO, CEO, your customer, a Chair — that won't tell you your idea is great. Open protocol, MIT, runs in any coding agent.">
+<meta property="og:title" content="Shiproom — the AI council that won't tell you your idea is great">
+<meta property="og:description" content="Seven adversarial seats judge your project and return a verdict you're not allowed to soften. It voted 5–1–1 on itself.">
+<meta property="og:image" content="https://nicobts.github.io/shiproom/assets/hero.jpg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nicobts.github.io/shiproom/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0A111C; --room:#0D1624; --panel:#121D2E; --panel-2:#16233A;
+    --rule:#22334C; --rule-soft:#1B2A40;
+    --ink:#E9EFF7; --ink-soft:#A9B8CD; --ink-faint:#68788F;
+    --teal:#46E0C6; --teal-dim:#2AA391;
+    --red:#F0604C; --red-dim:#B2402F;
+    --invest:#52C98D; --ship:#E4B44A; --shelve:#F0604C;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --sans:'Instrument Sans',system-ui,sans-serif;
+    --disp:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important}}
+  body{background:var(--night);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--teal);color:var(--night)}
+  a{color:var(--teal);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:2px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+
+  /* atmosphere: spotlight beam + grain */
+  .beam{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(52% 44% at 50% -6%, rgba(168,204,224,.13), rgba(168,204,224,0) 70%),
+      radial-gradient(30% 26% at 50% 0%, rgba(70,224,198,.05), rgba(70,224,198,0) 70%);}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+  main,nav,footer{position:relative;z-index:2}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;background:rgba(10,17,28,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule-soft)}
+  nav .wrap{display:flex;align-items:center;gap:26px;height:58px}
+  .wordmark{font-family:var(--disp);font-weight:700;font-size:19px;color:var(--ink);letter-spacing:.01em}
+  .wordmark:hover{text-decoration:none}
+  .wordmark .dot{color:var(--red)}
+  nav .links{display:flex;gap:22px;margin-left:auto;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+  nav .links a{color:var(--ink-soft)} nav .links a:hover{color:var(--teal);text-decoration:none}
+  @media(max-width:760px){nav .links a:not(.gh){display:none}}
+  .gh{border:1px solid var(--rule);border-radius:999px;padding:5px 14px;color:var(--ink)!important}
+  .gh:hover{border-color:var(--teal)}
+
+  /* hero */
+  header{padding:84px 0 0;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);animation:rise .7s .05s both}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(42px,7.4vw,84px);line-height:1.02;letter-spacing:-.015em;margin:22px auto 0;max-width:15ch;animation:rise .7s .15s both}
+  h1 em{font-style:italic;font-weight:400;color:var(--teal)}
+  .sub{margin:26px auto 0;max-width:62ch;font-size:clamp(16px,2.1vw,19px);color:var(--ink-soft);animation:rise .7s .3s both}
+  .sub b{color:var(--ink);font-weight:600}
+  .cta{margin:38px 0 0;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:rise .7s .45s both}
+  .btn{font-family:var(--mono);font-size:13.5px;letter-spacing:.04em;border-radius:8px;padding:13px 24px;display:inline-flex;align-items:center;gap:9px;transition:transform .15s ease,box-shadow .15s ease}
+  .btn:hover{text-decoration:none;transform:translateY(-2px)}
+  .btn-solid{background:var(--teal);color:#062019;font-weight:500}
+  .btn-solid:hover{box-shadow:0 8px 28px rgba(70,224,198,.28)}
+  .btn-line{border:1px solid var(--rule);color:var(--ink)}
+  .btn-line:hover{border-color:var(--teal);color:var(--teal)}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  .exhibit{margin:64px auto 0;max-width:980px;animation:rise .8s .6s both}
+  .exhibit .frame{border:1px solid var(--rule);border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(70,224,198,.06)}
+  .exhibit img{display:block;width:100%;height:auto}
+  .exhibit figcaption{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .exhibit figcaption .red{color:var(--red)}
+
+  /* sections */
+  section{padding:104px 0 0}
+  .sec-kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(28px,4.4vw,44px);line-height:1.1;letter-spacing:-.01em;max-width:24ch}
+  .lede{margin-top:16px;max-width:64ch;color:var(--ink-soft);font-size:17px}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* flattery vs verdict */
+  .versus{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:820px){.versus{grid-template-columns:1fr}}
+  .card{border:1px solid var(--rule);border-radius:12px;background:var(--panel);overflow:hidden}
+  .card .hd{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:12px 18px;border-bottom:1px solid var(--rule-soft);color:var(--ink-faint)}
+  .card .bd{padding:22px 22px 24px}
+  .chat p{border-radius:10px;padding:13px 16px;font-size:15px;max-width:44ch}
+  .chat .you{background:var(--panel-2);color:var(--ink-soft);margin-left:auto;margin-bottom:12px;border:1px solid var(--rule-soft)}
+  .chat .ai{background:#1A2333;color:var(--ink);border:1px solid var(--rule-soft)}
+  .chat .ai b{color:#9BE8B0}
+  .card.flat{opacity:.88}
+  .card.court{border-color:rgba(70,224,198,.35);box-shadow:0 0 44px rgba(70,224,198,.06)}
+  .tally-line{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .tally-num{font-family:var(--disp);font-weight:700;font-size:52px;line-height:1}
+  .tally-num .s{color:var(--ship)} .tally-num .i{color:var(--invest)} .tally-num .x{color:var(--shelve)}
+  .tally-cap{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+  .tallybar{margin-top:18px;height:10px;border-radius:99px;overflow:hidden;display:flex;background:var(--panel-2)}
+  .tallybar span{height:100%;width:0;transition:width 1.1s cubic-bezier(.6,0,.2,1)}
+  .tallybar .b-ship{background:var(--ship);transition-delay:.1s}
+  .tallybar .b-invest{background:var(--invest);transition-delay:.55s}
+  .tallybar .b-shelve{background:var(--shelve);transition-delay:.75s}
+  .in .tallybar .b-ship{width:71.4%} .in .tallybar .b-invest{width:14.3%} .in .tallybar .b-shelve{width:14.3%}
+  .court q{display:block;margin-top:18px;font-family:var(--disp);font-style:italic;font-size:16.5px;color:var(--ink-soft);quotes:"“" "”"}
+  .court .who{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--shelve);margin-top:8px;display:block}
+
+  /* bench */
+  .benchbox{margin-top:52px}
+  .seats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:end}
+  @media(max-width:820px){.seats{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:520px){.seats{grid-template-columns:repeat(2,1fr)}}
+  .seat{font:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px 10px 13px;text-align:center;color:var(--ink);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;position:relative}
+  .seat:nth-child(1),.seat:nth-child(7){transform:translateY(14px)}
+  .seat:nth-child(2),.seat:nth-child(6){transform:translateY(7px)}
+  @media(max-width:820px){.seat{transform:none!important}}
+  .seat .lamp{display:block;width:34px;height:8px;border-radius:3px;margin:0 auto 12px;background:var(--teal);box-shadow:0 0 14px rgba(70,224,198,.75)}
+  .seat.dissent .lamp{background:var(--red);box-shadow:0 0 14px rgba(240,96,76,.8)}
+  .seat .r{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.06em;display:block}
+  .seat .v{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-top:4px}
+  .seat:hover{border-color:var(--teal)}
+  .seat.dissent:hover{border-color:var(--red)}
+  .seat[aria-pressed="true"]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal),0 10px 30px rgba(0,0,0,.4);transform:translateY(-4px)!important}
+  .seat.dissent[aria-pressed="true"]{border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 10px 30px rgba(0,0,0,.4)}
+  .dock{margin-top:16px;border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:26px 28px;min-height:220px}
+  .dock .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .dock h3{font-family:var(--disp);font-weight:600;font-size:24px}
+  .pill{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-radius:999px;padding:5px 13px}
+  .pill.INVEST{background:rgba(82,201,141,.14);color:var(--invest);border:1px solid rgba(82,201,141,.4)}
+  .pill.SHIP{background:rgba(228,180,74,.12);color:var(--ship);border:1px solid rgba(228,180,74,.4)}
+  .pill.SHELVE{background:rgba(240,96,76,.13);color:var(--shelve);border:1px solid rgba(240,96,76,.45)}
+  .dock .mandate{margin-top:6px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase}
+  .dock q{display:block;margin-top:18px;font-family:var(--disp);font-style:italic;font-size:clamp(17px,2.4vw,21px);line-height:1.5;color:var(--ink);max-width:58ch;quotes:"“" "”"}
+  .dock .flip{margin-top:18px;font-size:14px;color:var(--ink-soft);border-left:3px solid var(--rule);padding-left:14px}
+  .dock .flip b{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:3px;font-weight:500}
+  .dock .flip.red b{color:var(--red)}
+  .bench-note{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em}
+
+  /* rules */
+  .rules{margin-top:48px;counter-reset:rule;display:grid;gap:0;border-top:1px solid var(--rule-soft)}
+  .rule{counter-increment:rule;display:grid;grid-template-columns:86px 1fr;gap:26px;padding:30px 0;border-bottom:1px solid var(--rule-soft)}
+  @media(max-width:640px){.rule{grid-template-columns:52px 1fr;gap:16px}}
+  .rule::before{content:"0" counter(rule);font-family:var(--disp);font-weight:400;font-style:italic;font-size:40px;color:var(--rule);line-height:1;transition:color .3s ease}
+  .rule:hover::before{color:var(--teal)}
+  .rule h3{font-family:var(--disp);font-weight:600;font-size:21px;margin-bottom:6px}
+  .rule p{color:var(--ink-soft);font-size:15.5px;max-width:62ch}
+  .rule p code{font-family:var(--mono);font-size:13px;color:var(--teal)}
+  .rule.alarm:hover::before{color:var(--red)}
+  .rule.alarm h3 span{color:var(--red)}
+
+  /* run it */
+  .tabs{margin-top:44px}
+  .tabbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .tabbtn{font:inherit;font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;cursor:pointer;border:1px solid var(--rule);background:transparent;color:var(--ink-soft);border-radius:8px 8px 0 0;padding:11px 20px;border-bottom:none}
+  .tabbtn[aria-selected="true"]{background:var(--panel);color:var(--teal);border-color:var(--rule)}
+  .tabpanel{border:1px solid var(--rule);border-radius:0 10px 10px 10px;background:var(--panel);padding:26px 28px}
+  .tabpanel[hidden]{display:none}
+  .term{background:#08101B;border:1px solid var(--rule-soft);border-radius:10px;padding:18px 20px;font-family:var(--mono);font-size:13.5px;line-height:1.9;overflow-x:auto;position:relative}
+  .term .p{color:var(--teal-dim);user-select:none}
+  .term .c{color:var(--ink-faint)}
+  .term b{color:var(--ink);font-weight:500}
+  .copy{position:absolute;top:10px;right:10px;font:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--ink-faint);background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:5px 11px}
+  .copy:hover{color:var(--teal);border-color:var(--teal)}
+  .tabpanel p.note{margin-top:16px;font-size:14.5px;color:var(--ink-soft);max-width:66ch}
+  .agents{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.05em}
+  .agents span{border:1px solid var(--rule-soft);border-radius:999px;padding:4px 12px;color:var(--ink-faint)}
+
+  /* grill */
+  .grill{margin-top:44px;display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+  @media(max-width:820px){.grill{grid-template-columns:1fr}}
+  .wound{border:1px solid rgba(240,96,76,.4);background:rgba(240,96,76,.05);border-radius:12px;padding:24px 26px}
+  .wound .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
+  .wound q{display:block;margin-top:12px;font-family:var(--disp);font-style:italic;font-size:19px;color:var(--ink);quotes:"“" "”"}
+  .wound p{margin-top:12px;font-size:14px;color:var(--ink-soft)}
+
+  /* docket cta */
+  .docket-cta{margin-top:48px;border:1px solid var(--rule);border-radius:14px;background:linear-gradient(180deg,var(--panel),var(--night));padding:40px;text-align:center}
+  .docket-cta h3{font-family:var(--disp);font-weight:600;font-size:clamp(24px,3.6vw,34px)}
+  .docket-cta p{margin:12px auto 0;max-width:52ch;color:var(--ink-soft)}
+  .docket-cta .cta{margin-top:26px}
+
+  footer{margin-top:110px;border-top:1px solid var(--rule-soft);padding:34px 0 46px}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:.04em}
+  footer a{color:var(--ink-soft)} footer a:hover{color:var(--teal)}
+</style>
+</head>
+<body>
+<div class="beam" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<nav>
+  <div class="wrap">
+    <a class="wordmark" href="#">Shiproom<span class="dot">.</span></a>
+    <div class="links">
+      <a href="#bench">The bench</a>
+      <a href="#protocol">Protocol</a>
+      <a href="#run">Run it</a>
+      <a href="docket/001-shiproom/">Verdict #001</a>
+      <a class="gh" href="https://github.com/nicobts/shiproom">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <header>
+    <p class="eyebrow">An open protocol · MIT · zero install</p>
+    <h1>The AI council that <em>won’t</em> tell you it’s great.</h1>
+    <p class="sub">Ask an AI to evaluate your project and you get flattery. Ask the Shiproom and you get
+      <b>seven adversarial seats</b> — CTO, CFO, VC, CMO, CEO, your target customer, and a Chair — each mandated
+      to find the strongest reason your project <b>fails</b> before saying what would change its mind.</p>
+    <div class="cta">
+      <a class="btn btn-solid" href="#run">Run it in 30 seconds</a>
+      <a class="btn btn-line" href="docket/001-shiproom/">Read the verdict it passed on itself</a>
+    </div>
+    <figure class="exhibit">
+      <div class="frame"><img src="assets/hero.jpg" alt="A dark courtroom at night: seven shadowed figures on a curved judicial bench, six teal verdict lights and one red, judging a paper boat folded from a pitch document" width="1600" height="791"></div>
+      <figcaption><span>Exhibit A — the room your idea has to walk out of</span><span>six lights teal · <span class="red">one red</span> · that’s the point</span></figcaption>
+    </figure>
+  </header>
+
+  <section id="why" class="reveal">
+    <p class="sec-kicker">The problem</p>
+    <h2>“Be brutally honest” lasts two turns.</h2>
+    <p class="lede">Prompt-level honesty collapses back into agreement — the model wants to please you,
+      whatever costume it wears. You can’t prompt your way out of sycophancy. So the Shiproom doesn’t
+      change the model’s tone; it changes the <b style="color:var(--ink)">structure it argues inside</b>.</p>
+    <div class="versus">
+      <div class="card flat">
+        <div class="hd">Any AI · turn one</div>
+        <div class="bd chat">
+          <p class="you">Evaluate my idea: a marketplace for left-handed scissors.</p>
+          <p class="ai">What a <b>compelling niche</b>! The TAM is genuinely inspiring, and your unique angle positions you perfectly. This could really take off! 🚀</p>
+        </div>
+      </div>
+      <div class="card court">
+        <div class="hd">The Shiproom · on its own repo</div>
+        <div class="bd">
+          <div class="tally-line">
+            <span class="tally-num"><span class="s">5</span>–<span class="i">1</span>–<span class="x">1</span></span>
+            <span class="tally-cap">Ship &amp; See · Invest · Shelve</span>
+          </div>
+          <div class="tallybar" role="img" aria-label="Tally: five Ship and See, one Invest, one Shelve">
+            <span class="b-ship"></span><span class="b-invest"></span><span class="b-shelve"></span>
+          </div>
+          <q>No revenue mechanism, no moat, and I will not launder the vocabulary to avoid saying so.</q>
+          <span class="who">— the VC seat, voting to shelve this very project</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="bench" class="reveal">
+    <p class="sec-kicker">The bench</p>
+    <h2>Seven seats. Seven ways to kill a bad idea.</h2>
+    <p class="lede">Each seat carries a kill mandate and argues in sequence — reacting to the seats before it,
+      by name. Select a seat to read its mandate and how it actually voted in
+      <a href="docket/001-shiproom/">Docket #001</a>, the verdict this project passed on itself.</p>
+    <div class="benchbox">
+      <div class="seats" role="group" aria-label="The seven seats of the council">
+        <button class="seat" data-i="0"><span class="lamp" aria-hidden="true"></span><span class="r">CTO</span><span class="v">Ship &amp; See</span></button>
+        <button class="seat" data-i="1"><span class="lamp" aria-hidden="true"></span><span class="r">CFO</span><span class="v">Ship &amp; See</span></button>
+        <button class="seat dissent" data-i="2" aria-pressed="true"><span class="lamp" aria-hidden="true"></span><span class="r">VC</span><span class="v">Shelve</span></button>
+        <button class="seat" data-i="3"><span class="lamp" aria-hidden="true"></span><span class="r">Chair</span><span class="v">Ship &amp; See</span></button>
+        <button class="seat" data-i="4"><span class="lamp" aria-hidden="true"></span><span class="r">CMO</span><span class="v">Invest</span></button>
+        <button class="seat" data-i="5"><span class="lamp" aria-hidden="true"></span><span class="r">CEO</span><span class="v">Ship &amp; See</span></button>
+        <button class="seat" data-i="6"><span class="lamp" aria-hidden="true"></span><span class="r">Customer</span><span class="v">Ship &amp; See</span></button>
+      </div>
+      <div class="dock" id="dock" aria-live="polite"></div>
+      <p class="bench-note">Quotes are verbatim from the published verdict — unedited, per protocol.</p>
+    </div>
+  </section>
+
+  <section id="protocol" class="reveal">
+    <p class="sec-kicker">Why it works</p>
+    <h2>The rules do the work the adjectives can’t.</h2>
+    <div class="rules">
+      <div class="rule">
+        <div><h3>Kill mandates</h3><p>Every seat must make the case for failure <em>first</em>. Praise is only allowed after the seat has genuinely tried to bury you.</p></div>
+      </div>
+      <div class="rule">
+        <div><h3>A sourced fact base</h3><p>Competitors, pricing, comparable outcomes — gathered and cited before deliberation. Claims without sources are struck; unverifiable numbers are labeled <code>ESTIMATE</code>.</p></div>
+      </div>
+      <div class="rule">
+        <div><h3>Forced engagement</h3><p>Every seat must explicitly agree or disagree with a prior seat, by name. This is what stops seven monologues from pretending to be a debate.</p></div>
+      </div>
+      <div class="rule">
+        <div><h3>Pre-committed verdicts</h3><p>Every seat ends with a vote — <code>INVEST</code> / <code>SHIP_AND_SEE</code> / <code>SHELVE</code> — plus the one metric that would flip it. Thresholds are written before you know the outcome, never edited after.</p></div>
+      </div>
+      <div class="rule alarm">
+        <div><h3>The unanimity <span>alarm</span></h3><p>A unanimously cheerful run is treated as a failed run. If every seat agrees your idea is great, the council didn’t work — and the repo ships a drift canary to catch exactly that.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="run" class="reveal">
+    <p class="sec-kicker">Run it</p>
+    <h2>Zero install, or the full courtroom.</h2>
+    <div class="tabs">
+      <div class="tabbtns" role="tablist" aria-label="Ways to run the Shiproom">
+        <button class="tabbtn" role="tab" id="tb0" aria-selected="true" aria-controls="tp0">Paste one file</button>
+        <button class="tabbtn" role="tab" id="tb1" aria-selected="false" aria-controls="tp1">Full version</button>
+        <button class="tabbtn" role="tab" id="tb2" aria-selected="false" aria-controls="tp2">Guided flow</button>
+      </div>
+      <div class="tabpanel" id="tp0" role="tabpanel" aria-labelledby="tb0">
+        <div class="term"><button class="copy" data-copy="https://github.com/nicobts/shiproom/blob/master/SHIPROOM.md">copy link</button><span class="c"># the whole setup:</span><br><b>1.</b> paste <b>SHIPROOM.md</b> into any capable AI — Claude, ChatGPT, Gemini, Cursor, anything<br><b>2.</b> add a description of your project + your real constraints<br><b>3.</b> receive a verdict you’re not allowed to soften</div>
+        <p class="note">One self-contained markdown file. No install, no account, no telemetry. This mode exists
+          because the customer seat refused to <span style="font-family:var(--mono);font-size:13px">git clone</span> a repo to ask a question — the verdict forced the feature.</p>
+      </div>
+      <div class="tabpanel" id="tp1" role="tabpanel" aria-labelledby="tb1" hidden>
+        <div class="term"><button class="copy" data-copy="git clone https://github.com/nicobts/shiproom && cd your-project && node ../shiproom/cli/index.js init">copy</button><span class="p">$</span> git clone https://github.com/nicobts/shiproom<br><span class="p">$</span> cd your-project<br><span class="p">$</span> node ../shiproom/cli/index.js init  <span class="c"># auto-detects your harness</span></div>
+        <p class="note">Adds web-verified fact bases, structured <span style="font-family:var(--mono);font-size:13px">verdict.json</span> output, the interactive
+          verdict page, and a zero-dependency CLI for the plumbing — the thinking stays in your agent.</p>
+        <div class="agents"><span>Claude Code</span><span>Codex</span><span>Cursor</span><span>Copilot</span><span>Windsurf</span><span>Gemini CLI</span><span>any AGENTS.md reader</span></div>
+      </div>
+      <div class="tabpanel" id="tp2" role="tabpanel" aria-labelledby="tb2" hidden>
+        <div class="term"><span class="p">/shiproom</span> <b>scope</b>    <span class="c">the Clerk interviews you, seats the bench</span><br><span class="p">/shiproom</span> <b>run</b>      <span class="c">the deliberation — seat by seat, resume-safe</span><br><span class="p">/shiproom</span> <b>grill</b>    <span class="c">the appeal — the seats question YOU</span><br><span class="p">/shiproom</span> <b>verdict</b>  <span class="c">render the verdict page</span><br><span class="p">/shiproom</span> <b>docket</b>   <span class="c">publish it, scars and all</span></div>
+        <p class="note">Five commands with resumable state — quit mid-grill tonight, resume at the same seat tomorrow.
+          Your agent runs the council in your language: an Italian founder’s bench argues in Italian.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="grillsec" class="reveal">
+    <p class="sec-kicker">Grill mode</p>
+    <h2>The verdict judges your documents.<br>The grill judges <em>you</em>.</h2>
+    <div class="grill">
+      <p class="lede" style="margin-top:6px">Each seat questions you directly, one question at a time. Answers must be numbers,
+        facts, names, or decisions — “we believe strongly in our vision” doesn’t parse. Answer well and seats revise
+        their votes; the Chair re-tallies. Frank, not cruel: the protocol bans insults and theatrics.
+        <b style="color:var(--ink)">Specificity is the aggression.</b></p>
+      <div class="wound">
+        <span class="k">Open wound · recorded verbatim</span>
+        <q>You said “strong early interest.” How many of the twelve users came back in week two?</q>
+        <p>Dodge a question twice and it goes in your verdict, word for word, as an open wound. The scar tissue is the point.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="docket" class="reveal">
+    <p class="sec-kicker">The docket</p>
+    <h2>Published verdicts, starting with our own.</h2>
+    <p class="lede">All seven seats run on one model, so treat every verdict as a hypothesis and its thresholds as
+      the experiment that tests it — the protocol structures your decision; it can’t replace real market contact.
+      What it can do is go on the record. Ran the council and willing to show the scars?</p>
+    <div class="docket-cta">
+      <h3>SHELVE verdicts especially welcome.</h3>
+      <p>Getting roasted well is a badge of honor. PR your verdict folder into the Docket — it publishes unedited, dissent and all, next to the verdict this project passed on itself.</p>
+      <div class="cta">
+        <a class="btn btn-solid" href="https://github.com/nicobts/shiproom">Star the repo</a>
+        <a class="btn btn-line" href="https://github.com/nicobts/shiproom/blob/master/CONTRIBUTING.md">Publish your verdict</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Shiproom — an open protocol · MIT · no accounts, no telemetry</span>
+    <span>Built by <a href="https://www.linkedin.com/in/nicolas-bossi-26a326b3/">Nicolas Bossi</a> · <a href="mailto:nicolasbossi@gmail.com">nicolasbossi@gmail.com</a> · <a href="https://github.com/nicobts/shiproom">GitHub</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var SEATS=[
+    {role:"CTO",mandate:"Mandate — technical defensibility & maintenance reality",votecls:"SHIP",votetxt:"Ship & See",dissent:false,
+     quote:"The moat is exactly zero and I won’t dress that up… the one real risk nobody has named yet: prompt rot. Without a regression check, the council silently degrades back into flattery and dies of the exact disease it claims to cure.",
+     flip:"Evidence the share loop builds a recognized brand — the one asset a copier cannot clone in an hour."},
+    {role:"CFO",mandate:"Mandate — unit economics & return on hours",votecls:"SHIP",votetxt:"Ship & See",dissent:false,
+     quote:"This is not a business, it is a reputation asset, and its P&L is denominated in credibility, not dollars. Roughly two part-time weeks is the entire downside; the timebox IS the risk control.",
+     flip:"Clearing 1,000 stars or an equivalent distribution event would promote this to INVEST."},
+    {role:"VC",mandate:"Mandate — venture shape & investability",votecls:"SHELVE",votetxt:"Shelve",dissent:true,
+     quote:"No revenue mechanism, no moat, and I will not launder the vocabulary to avoid saying so. My dissent is the system working: if this council could not produce a SHELVE against its own creator, it would be worthless.",
+     flip:"A hosted verdict gallery with meaningful recurring traffic — then we can talk."},
+    {role:"Chair",mandate:"Mandate — synthesis only, adds no new arguments",votecls:"SHIP",votetxt:"Ship & See",dissent:false,
+     quote:"Tally: 5–1–1 — and the split is the healthiest possible outcome for a tool whose brand is refusing unanimity. Two seat demands are adopted as launch requirements, not suggestions.",
+     flip:"N/A — the Chair synthesizes; the pre-committed thresholds decide."},
+    {role:"CMO",mandate:"Mandate — distribution & positioning",votecls:"INVEST",votetxt:"Invest",dissent:false,
+     quote:"The falsifiable claim I stake my vote on: the side-by-side screenshot — naive flattery vs. council verdict — will outperform every sentence of copy we write.",
+     flip:"No organic pull from a small pre-launch test of the self-verdict screenshot → downgrade to Ship & See."},
+    {role:"CEO",mandate:"Mandate — focus & sequencing",votecls:"SHIP",votetxt:"Ship & See",dissent:false,
+     quote:"Sequencing is the entire risk here; the tool is cheap, the calendar is not. Every additional template beyond the launch minimum is killed until after both launches.",
+     flip:"The pre-committed thresholds — clear them and this graduates to INVEST; miss them all and it goes to maintenance mode the same week."},
+    {role:"Customer",mandate:"Mandate — the target user’s reality check (ICP)",votecls:"SHIP",votetxt:"Ship & See",dissent:false,
+     quote:"I will not git clone a repo to ask a question, ever; I WILL paste one file. Make me install something and I’ll star the repo, feel virtuous, and never run it.",
+     flip:"A zero-install one-paste mode existing is the difference between “nice repo” and “thing I actually ran.” (It shipped.)"}
+  ];
+  var dock=document.getElementById('dock');
+  var btns=[].slice.call(document.querySelectorAll('.seat'));
+  function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n}
+  function show(i){
+    var s=SEATS[i];
+    dock.textContent='';
+    var top=el('div','top');
+    top.appendChild(el('h3',null,s.role));
+    top.appendChild(el('span','pill '+s.votecls,s.votetxt));
+    dock.appendChild(top);
+    dock.appendChild(el('p','mandate',s.mandate));
+    dock.appendChild(el('q',null,s.quote));
+    var flip=el('div','flip'+(s.dissent?' red':''));
+    flip.appendChild(el('b',null,'Flip condition'));
+    flip.appendChild(document.createTextNode(s.flip));
+    dock.appendChild(flip);
+    btns.forEach(function(b,j){b.setAttribute('aria-pressed',j===i?'true':'false')});
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){show(+b.dataset.i)})});
+  show(2); // open on the dissent
+
+  // tabs
+  var tabs=[].slice.call(document.querySelectorAll('.tabbtn'));
+  tabs.forEach(function(t,i){t.addEventListener('click',function(){
+    tabs.forEach(function(o,j){o.setAttribute('aria-selected',i===j?'true':'false');
+      document.getElementById('tp'+j).hidden=(i!==j)});
+  })});
+
+  // copy buttons
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function(c){
+    c.addEventListener('click',function(){
+      navigator.clipboard.writeText(c.dataset.copy).then(function(){
+        var t=c.textContent;c.textContent='copied ✓';setTimeout(function(){c.textContent=t},1600);
+      });
+    });
+  });
+
+  // scroll reveals
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+    [].slice.call(document.querySelectorAll('.reveal')).forEach(function(el){io.observe(el)});
+  }else{
+    [].slice.call(document.querySelectorAll('.reveal')).forEach(function(el){el.classList.add('in')});
+  }
+})();
+</script>
+</body>
+</html>
