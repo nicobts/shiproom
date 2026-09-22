@@ -204,7 +204,7 @@ tests/                             node:test suite for the helper (npm test)
       covered by tests in CI (Node 18, 20, 22)
 - [ ] Verify the install end to end in Claude Code (plugin and `npx skills`), Codex,
       Cursor, Gemini CLI and OpenCode
-- [ ] Tag the first release, `v0.3.0`, with release notes
+- [x] Tag the first release, `v0.3.0`, with release notes
 - [ ] Record a 20-second demo of a verdict landing and embed it at the top of this README
 - [ ] Submit to skill and plugin directories (skills.sh, Claude Code plugin marketplaces)
 
