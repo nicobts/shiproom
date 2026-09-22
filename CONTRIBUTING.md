@@ -32,7 +32,7 @@ docket/NNN-your-project/
   verdict.json    required — must validate against skills/shiproom/references/verdict.schema.json
   README.md       required — tally, one line per seat, your thresholds
   index.html      optional — copy of skills/shiproom/assets/dashboard.html for the interactive page
-  card.svg        optional — share card (shiproom card)
+  card.svg        share card, written by `shiproom docket` (plus card.png when Chrome or Edge is installed)
 ```
 
 Use the next free `NNN`. Validate before pushing:

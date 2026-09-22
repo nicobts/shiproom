@@ -76,7 +76,7 @@ describes. Never run `npx shiproom`: that npm name belongs to an unrelated packa
 |---|---|
 | `validate [path]` | Check `.council/verdict.json` against the schema after writing it |
 | `view [dir] [--port=N]` | Serve the verdict page on localhost |
-| `card [path]` | Write a 1200×630 share card (`card.svg`) next to the verdict |
+| `card [path] [--png] [--theme=light]` | Write a 1200×630 share card (`card.svg`; `--png` adds `card.png` for social previews, using a local Chrome or Edge) |
 | `docket [path]` | Package the verdict into `docket-entry/<date>-<slug>/` |
 | `canary [path]` | Drift check on a run of the fixture in `references/canary/FIXTURE.md` |
 

@@ -75,16 +75,44 @@ test('validate finds .council/verdict.json by default', () => {
   assert.strictEqual(run(['validate'], tmpDir()).status, 1);
 });
 
-test('card writes an SVG next to the verdict and refuses invalid input', () => {
+test('card writes a themed SVG with embedded fonts and refuses invalid input', () => {
   const dir = tmpDir();
   const p = writeVerdict(dir, sample());
   assert.strictEqual(run(['card', p]).status, 0);
   const svg = fs.readFileSync(path.join(dir, 'card.svg'), 'utf8');
   assert.match(svg, /^<svg/);
-  assert.doesNotMatch(svg, /undefined/);
-  const bad = tmpDir();
-  assert.strictEqual(run(['card', writeVerdict(bad, { project: 'x' })]).status, 1);
-  assert.ok(!fs.existsSync(path.join(bad, 'card.svg')));
+  assert.match(svg, /@font-face\{font-family:'Fraunces'/);
+  assert.match(svg, /#0A111C/, 'dark theme by default');
+  assert.match(svg, /DISSENT|UNANIMOUS/);
+  assert.doesNotMatch(svg.replace(/<style>[\s\S]*?<\/style>/, ''), /undefined|NaN/, 'outside the embedded fonts');
+
+  assert.strictEqual(run(['card', p, '--theme=light']).status, 0);
+  assert.match(fs.readFileSync(path.join(dir, 'card.svg'), 'utf8'), /#F4F6F9/);
+  const bad = run(['card', p, '--theme=neon']);
+  assert.strictEqual(bad.status, 1);
+  assert.match(bad.stderr, /Unknown theme/);
+
+  const invalid = tmpDir();
+  assert.strictEqual(run(['card', writeVerdict(invalid, { project: 'x' })]).status, 1);
+  assert.ok(!fs.existsSync(path.join(invalid, 'card.svg')));
+});
+
+test('card --png renders a 1200x630 PNG when a browser is available', (t) => {
+  const probe = run(['card', writeVerdict(tmpDir(), sample()), '--png']);
+  if (probe.status !== 0 && /No Chrome, Edge or Chromium/.test(probe.stderr)) return t.skip('no browser installed');
+  const dir = tmpDir();
+  const r = run(['card', writeVerdict(dir, sample()), '--png']);
+  assert.strictEqual(r.status, 0, r.stderr);
+  const png = fs.readFileSync(path.join(dir, 'card.png'));
+  assert.strictEqual(png.toString('latin1', 1, 4), 'PNG');
+  assert.strictEqual(png.readUInt32BE(16), 1200);
+  assert.strictEqual(png.readUInt32BE(20), 630);
+});
+
+test('the verdict page embeds the current font files', () => {
+  const { embed, PAGE } = require('../tools/embed-fonts.js');
+  const html = fs.readFileSync(PAGE, 'utf8').replace(/\r\n/g, '\n');
+  assert.strictEqual(embed(html), html, 'run: node tools/embed-fonts.js');
 });
 
 test('docket builds a self-contained entry', () => {

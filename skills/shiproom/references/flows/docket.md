@@ -3,8 +3,9 @@
 1. Require `.council/verdict.json`. Ask (options): "Publish under the project's real
    name, or anonymized?" — if anonymized, strip identifying strings from a COPY; never
    modify the original.
-2. If the `shiproom` CLI is available: `shiproom docket` builds the entry folder and
-   `shiproom card` the share image — then continue at step 3 with its output. Manual
+2. If the `shiproom` CLI is available: `shiproom docket` builds the entry folder,
+   including the share card (`card.svg`, plus `card.png` when Chrome or Edge is
+   installed) — then continue at step 3 with its output. Manual
    fallback: build `docket-entry/<slug>/` containing: `verdict.json` (with `"sample": false`),
    a rendered `index.html` (dashboard with the verdict embedded, so it works as a
    static page), and a 5-line `README.md`: project, date, tally, decision, one-line

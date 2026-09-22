@@ -100,7 +100,7 @@ when to call it, so you rarely run it yourself:
 ```
 node skills/shiproom/scripts/shiproom.js validate   check verdict.json against the schema and protocol rules
 node skills/shiproom/scripts/shiproom.js view       serve the verdict page on 127.0.0.1
-node skills/shiproom/scripts/shiproom.js card       generate a 1200×630 share image
+node skills/shiproom/scripts/shiproom.js card       generate a 1200×630 share card (--png for social previews)
 node skills/shiproom/scripts/shiproom.js docket     package a verdict for the public Docket
 node skills/shiproom/scripts/shiproom.js canary     drift check on a run of the flawed fixture
 ```
@@ -218,7 +218,7 @@ tests/                             node:test suite for the helper (npm test)
       from the charter
 - [ ] Alternative benches as templates: nonprofit, research project, internal tool
 - [ ] Issue templates for new seats and Docket submissions
-- [ ] A one-command PNG export for the share card
+- [x] A one-command PNG export for the share card (`card --png`)
 
 ### Possible later
 
