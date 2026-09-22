@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/nicobts/shiproom/council/verdict.schema.json",
+  "$id": "https://github.com/nicobts/shiproom/skills/shiproom/references/verdict.schema.json",
   "title": "Shiproom Verdict",
   "type": "object",
   "required": [
@@ -167,7 +167,7 @@
     },
     "grill": {
       "type": "object",
-      "description": "Optional interrogation/appeal results (see council/GRILL.md)",
+      "description": "Optional interrogation/appeal results (see references/GRILL.md)",
       "required": [
         "mode",
         "openWounds",

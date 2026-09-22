@@ -1,6 +1,10 @@
 ---
 name: shiproom
-description: Run an adversarial seven-seat validation council (CTO, CFO, VC, CMO, CEO, target customer, Chair) that stress-tests a project idea and returns a structured INVEST / SHIP_AND_SEE / SHELVE verdict with pre-committed go/no-go thresholds. Use when the user wants to validate a project, product idea, or side project before committing resources; when they ask "is this worth building", "should I turn this into a SaaS", "evaluate my idea", or want a red-team / devil's-advocate review of a business plan.
+description: Run an adversarial seven-seat validation council (CTO, CFO, VC, CMO, CEO, target customer, Chair) that stress-tests a project idea and returns a structured INVEST / SHIP_AND_SEE / SHELVE verdict with pre-committed go/no-go thresholds. Use when the user wants to validate a project, product idea, or side project before committing resources; when they ask "is this worth building", "should I turn this into a SaaS", "evaluate my idea", or want a red-team / devil's-advocate review of a business plan. Supports the subcommands scope, run, grill, verdict, and docket.
+license: MIT
+metadata:
+  version: "0.3.0"
+  homepage: https://github.com/nicobts/shiproom
 ---
 
 # Shiproom
@@ -8,46 +12,80 @@ description: Run an adversarial seven-seat validation council (CTO, CFO, VC, CMO
 An adversarial multi-persona review protocol. Seven seats argue in sequence, each
 mandated to find the strongest failure case from their vantage point, each ending with a
 mandatory VOTE / FLIP CONDITION / ONE ACTION. Output is a transcript plus a `verdict.json`
-rendered by an interactive dashboard.
+rendered by an interactive verdict page.
 
-## CLI integration (prefer when available)
+**Paths.** Every path below (`references/…`, `assets/…`, `scripts/…`) is relative to the
+folder containing this `SKILL.md`. State paths (`.council/…`) are relative to the user's
+project root. Never copy protocol files into the user's project; read them from here.
 
-Check once per session whether the utility CLI is installed (`shiproom --help` exits 0).
-Never probe with `npx shiproom`: that npm name belongs to an unrelated package.
-If it is installed, use it for the deterministic steps instead
-of doing them manually: `shiproom validate` (schema check after writing verdict.json),
-`shiproom view` (serve the verdict page), `shiproom card` (1200×630 share image),
-`shiproom docket` (package for publishing), `shiproom canary` (drift check on fixture
-runs). The deliberation itself always runs here, in the agent — the CLI never thinks.
+## Subcommands
 
-## Command vocabulary (guided flows)
+The user may invoke this skill with a subcommand (e.g. `/shiproom run`, or "run the
+shiproom grill"). Follow the matching flow file **exactly** — the flows define a guided,
+multi-step experience; do not compress steps or ask questions in bulk:
 
-If the harness supports commands, `/shiproom` dispatches per `commands/shiproom.md`:
-`scope` (Clerk interview — one question at a time), `run` (deliberation with progress
-and resume), `grill` (interrogation/appeal — free-text answers only), `verdict` (render
-the page), `docket` (publish). State lives in `.council/` (scope.json, factbase.md,
-verdict.json, transcript.md); every flow resumes from state rather than restarting.
-Without command support, follow the same flow files in `council/flows/` when the user
-asks to scope, run, grill, or publish.
+| Subcommand | Flow file | What it does |
+|---|---|---|
+| `scope` | `references/flows/scope.md` | The Clerk interviews the user, classifies the case, proposes the bench |
+| `run` | `references/flows/run.md` | The deliberation — seven seats, sequential, verdict at the end |
+| `grill` | `references/flows/grill.md` | The interrogation/appeal — seats question the user live |
+| `verdict` | `references/flows/verdict.md` | Render/refresh the verdict page from `.council/verdict.json` |
+| `docket` | `references/flows/docket.md` | Package the verdict for publishing to the public Docket |
+| *(none)* | — | Show status (below) |
 
-## How to run
+Anything after the subcommand is context (e.g. `/shiproom run docs/prd.md` points at docs).
+If the user just asks to "validate my idea" with no subcommand and no `.council/` state,
+start with `scope`.
 
-1. Read `../../shiproom/CHARTER.md` — it is the complete protocol and its ground rules
-   are binding (especially: members react to prior members; no cheerleading; no invented
-   statistics; the Chair adds no new arguments).
-2. Complete the intake: project summary from its own docs, the builder's constraints,
-   and a sourced fact base (use web search if available to verify competitor pricing and
-   comparable outcomes).
-3. Run seats 1-7 sequentially in one context.
-4. Write `council-verdict-<date>.md` (full transcript) and `verdict.json` conforming to
-   `../../shiproom/verdict.schema.json`.
-5. Copy `../../dashboard/index.html` next to `verdict.json`; the page auto-loads it when
-   served over HTTP (e.g. `python3 -m http.server`) and shows an embedded sample otherwise.
+### Status (no subcommand)
 
-## Rules that survive any summarization
+Read `.council/` if it exists, print a short status board, then suggest the next step:
 
-- The verdict format is mandatory for every seat.
-- Seats 6 (target customer) and 7 (Chair) can never be dropped.
-- Never edit a committed verdict to be more positive; its value is as a pre-commitment.
+- No `.council/` → "No council state. Start with `/shiproom scope`."
+- `scope.json` only → summarize the scope in 2 lines → "Bench approved. Next: `/shiproom run`."
+- `verdict.json` present → print the tally and decision → "Appeal with `/shiproom grill`,
+  render with `/shiproom verdict`, publish with `/shiproom docket`."
+- `verdict.json` with a `grill` block → print the re-tally and open-wounds count → suggest
+  `/shiproom docket`.
+
+## Global rules (every subcommand)
+
+- `references/CHARTER.md` is the complete protocol; its ground rules are binding
+  (members react to prior members; no cheerleading; no invented statistics; the Chair
+  adds no new arguments). The tone clause in `references/GRILL.md` is binding too.
+- State lives in `.council/` at the project root: `scope.json`, `factbase.md`,
+  `verdict.json`, `transcript.md`. Every flow reads state first and **resumes** rather
+  than restarts — if a run stopped at seat 4, continue at seat 4 and say so.
+- Ask ONE question at a time. Where the harness has a structured question tool, use it
+  with 2–4 short options for closed questions; use plain text for open questions and for
+  all grill answers (grill answers are always free text).
+- `verdict.json` must conform to `references/verdict.schema.json`.
+- Never edit a written verdict to be more positive, even if asked. Its value is as a
+  pre-commitment.
 - If the target project's docs are not provided, ask for them before running — the
   council argues from documents, not vibes.
+
+## Helper script (deterministic steps)
+
+`scripts/shiproom.js` is a zero-dependency Node (18+) script. Wherever a flow says
+`shiproom <command>`, run `node <this-skill-folder>/scripts/shiproom.js <command>` from
+the user's project root. If Node is unavailable, do the step by hand as the flow
+describes. Never run `npx shiproom`: that npm name belongs to an unrelated package.
+
+| Command | Use |
+|---|---|
+| `validate [path]` | Check `.council/verdict.json` against the schema after writing it |
+| `view [dir] [--port=N]` | Serve the verdict page on localhost |
+| `card [path]` | Write a 1200×630 share card (`card.svg`) next to the verdict |
+| `docket [path]` | Package the verdict into `docket-entry/<date>-<slug>/` |
+| `canary [path]` | Drift check on a run of the fixture in `references/canary/FIXTURE.md` |
+
+The deliberation itself always runs here, in the agent — the script never thinks.
+
+## Optional: multi-model seat diversity
+
+All seats on one model share one set of blind spots. If other provider CLIs are
+installed (`codex`, `gemini`, `ollama`), you MAY route designated seats through them with
+the seat's mandate and the fact base, and integrate the returned argument, attributed to
+its model. Keep the Chair and the grill local, and note in the verdict which seats ran on
+which model.

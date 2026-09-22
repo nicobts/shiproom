@@ -1,0 +1,15 @@
+{
+  "name": "shiproom",
+  "description": "Shiproom: an adversarial AI council that stress-tests your project idea before you build it.",
+  "owner": {
+    "name": "Nicolas Bossi",
+    "url": "https://github.com/nicobts"
+  },
+  "plugins": [
+    {
+      "name": "shiproom",
+      "source": "./",
+      "description": "Adversarial seven-seat council that stress-tests a project idea and returns a pre-committed INVEST / SHIP_AND_SEE / SHELVE verdict."
+    }
+  ]
+}

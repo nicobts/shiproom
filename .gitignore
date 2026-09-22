@@ -1,4 +1,3 @@
-dist/
 .council/
 node_modules/
 .playwright-mcp/

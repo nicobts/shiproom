@@ -374,7 +374,7 @@ function render(d){
 
   $('meta').innerHTML =
     `<span><b>Seats</b>${d.members.length}</span>` +
-    `<span><b>Protocol</b>council/CHARTER.md</span>` +
+    `<span><b>Protocol</b>references/CHARTER.md</span>` +
     Object.entries(tally).map(([v,n]) => `<span><b>${esc(VOTE_LABEL[v]||v)}</b>${n} vote${n>1?'s':''}</span>`).join('');
 
   /* bench */

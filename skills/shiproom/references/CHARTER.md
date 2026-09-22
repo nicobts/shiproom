@@ -106,7 +106,7 @@ summary the builder should reread at the deadline when deciding.
 
 1. `council-verdict-<YYYY-MM-DD>.md` — full transcript, committed and never edited.
 2. `verdict.json` — structured summary conforming to `verdict.schema.json`, consumed by
-   `dashboard/index.html` for the interactive recap.
+   `assets/dashboard.html` for the interactive recap.
 
 ## Customization
 

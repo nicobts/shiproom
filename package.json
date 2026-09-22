@@ -1,23 +1,20 @@
 {
   "name": "shiproom",
-  "version": "0.2.0",
-  "description": "Shiproom \u2014 the go/no-go room for your idea. An adversarial AI council (CTO, CFO, VC, CMO, CEO, your customer, a Chair) that won't tell you your idea is great. Runs in any coding agent; CLI handles the plumbing.",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Shiproom — the go/no-go room for your idea. An adversarial AI council that won't tell you your idea is great. Ships as an Agent Skill and a Claude Code plugin.",
   "bin": {
-    "shiproom": "cli/index.js"
+    "shiproom": "skills/shiproom/scripts/shiproom.js"
   },
   "files": [
-    "cli",
-    "council",
-    "dashboard",
     "skills",
-    "commands",
     "SHIPROOM.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "GEMINI.md",
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "test": "node --test tests/shiproom.test.js"
+  },
   "engines": {
     "node": ">=18"
   },

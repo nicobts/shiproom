@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Self-verdict: Ship & See 5-1-1](https://img.shields.io/badge/self--verdict-Ship%20%26%20See%205--1--1-0f766e)](./docket/001-shiproom/)
-[![AGENTS.md compatible](https://img.shields.io/badge/AGENTS.md-compatible-6e56cf)](https://agents.md)
+[![Agent Skill](https://img.shields.io/badge/Agent%20Skill-compatible-6e56cf)](https://agentskills.io)
 
 **English** · [简体中文](./i18n/README.zh-CN.md) · [日本語](./i18n/README.ja.md) · [Español](./i18n/README.es.md) · [Italiano](./i18n/README.it.md) · [Français](./i18n/README.fr.md) — [add your language](./i18n/)
 
@@ -35,37 +35,50 @@ Gemini, Cursor, Codex, anything — along with a description of your project. Th
 whole setup. The repo version below adds web-verified fact bases, structured
 `verdict.json` output, and the interactive verdict page.
 
-## Full version — works with every major coding agent
+## Install — as a skill, in any coding agent
 
-```bash
-git clone https://github.com/nicobts/shiproom
-cd your-project
-node ../shiproom/cli/index.js init   # auto-detects your harness
+Shiproom is a standard [Agent Skill](https://agentskills.io): one self-contained folder,
+`skills/shiproom/`, that any skills-aware agent can load. Pick one:
+
+**Claude Code — plugin**
+
+```
+/plugin marketplace add nicobts/shiproom
+/plugin install shiproom@shiproom
 ```
 
-No `.claude/`, `.cursor/`, `.agents/` or `.gemini/` folder yet? Pass the harness
-explicitly: `init --claude` (or `--cursor`, `--codex`, `--gemini`, `--all`).
+**Claude Code, Codex, Cursor, Gemini CLI, OpenCode, Copilot and more — via the
+[skills CLI](https://github.com/vercel-labs/skills)**
 
-Shiproom is not on npm yet — run the CLI from your clone as above. Everything is plain
-markdown plus one HTML file, so copying the folders by hand also works.
+```bash
+npx skills add nicobts/shiproom            # this project
+npx skills add nicobts/shiproom --global   # every project
+```
+
+`npx skills update` and `npx skills remove shiproom` handle upgrades and uninstall.
+
+**By hand** — copy `skills/shiproom/` into your agent's skills folder:
+`.claude/skills/` for Claude Code, `.agents/skills/` for Codex, Cursor, Gemini CLI and
+OpenCode (or the user-level equivalent, e.g. `~/.claude/skills/`).
+
+Nothing is written to your project except the council's own state in `.council/`. Your
+`AGENTS.md`, `CLAUDE.md` and other files are never touched.
 
 Then, in your agent:
 
-> Run the Shiproom per council/CHARTER.md on this project.
-> My docs are in ./docs. My constraints: [hours/week, funding, team, goal].
+> /shiproom scope
 
-- **Codex / Cursor / Copilot / Windsurf / Devin** read `AGENTS.md` natively
-  (the [Linux Foundation-stewarded standard](https://agents.md), 60K+ repos).
-- **Claude Code** reads `CLAUDE.md` (imports `AGENTS.md`) and the portable skill in
-  `skills/shiproom/`.
-- **Gemini CLI** reads `GEMINI.md`, or set `context.fileName` to `AGENTS.md`.
-- Your agent runs in your language — an Italian founder's council argues in Italian.
-  Zero i18n, global by construction.
+or, in agents without slash commands:
 
-## In your terminal — the guided experience
+> Run the Shiproom on this project. My docs are in ./docs.
+> My constraints: [hours/week, funding, team, goal].
 
-Inside Claude Code (or any command-capable harness) the Council is a five-command flow
-with resumable state in `.council/`:
+Your agent runs the council in your language — an Italian founder's council argues in
+Italian. Zero i18n, global by construction.
+
+## The guided experience
+
+The Council is a five-step flow with resumable state in `.council/`:
 
 ```
 /shiproom scope    the Clerk interviews you (one question at a time), seats the bench
@@ -75,29 +88,30 @@ with resumable state in `.council/`:
 /shiproom docket   package it for the public Docket
 ```
 
-Quit mid-grill tonight; `/shiproom grill` resumes at the same seat tomorrow. Other
-harnesses (Codex, Cursor, Copilot, Gemini CLI, OpenCode) get the same flows via
-`AGENTS.md` and the portable skill — run `scripts/build-dist.sh` for per-tool bundles.
+Quit mid-grill tonight; `/shiproom grill` resumes at the same seat tomorrow. As a
+plugin, the command is namespaced: `/shiproom:shiproom scope`.
 
-## The CLI — plumbing, not thinking
+## The helper script — plumbing, not thinking
 
-The deliberation runs in *your* agent (skill-first, near-zero context cost while idle);
-a zero-dependency CLI (Node 18+) handles the deterministic parts. `shiproom` below means
-`node <path-to-clone>/cli/index.js`, or plain `shiproom` after `npm link` in the clone:
+The deliberation runs in *your* agent. A zero-dependency Node 18+ script inside the
+skill, `scripts/shiproom.js`, handles the deterministic parts; the skill tells your agent
+when to call it, so you rarely run it yourself:
 
 ```
-shiproom init                  install into a project (detects Claude Code/Cursor/Codex/Gemini)
-shiproom validate              check a verdict.json against the protocol contract
-shiproom view                  serve the verdict page locally
-shiproom card                  generate a 1200×630 share image from a verdict
-shiproom docket                package a verdict for the public Docket
-shiproom canary                drift check: run the council on the flawed fixture
-                              (council/canary/FIXTURE.md) with any new model — if the
-                              verdict comes back cheerful, the protocol failed, not passed
+node skills/shiproom/scripts/shiproom.js validate   check verdict.json against the schema and protocol rules
+node skills/shiproom/scripts/shiproom.js view       serve the verdict page on 127.0.0.1
+node skills/shiproom/scripts/shiproom.js card       generate a 1200×630 share image
+node skills/shiproom/scripts/shiproom.js docket     package a verdict for the public Docket
+node skills/shiproom/scripts/shiproom.js canary     drift check on a run of the flawed fixture
 ```
 
-Your agent uses the CLI automatically when it's installed (the skill teaches it) — the
-CLI+Skills pattern, with the token-heavy thinking staying in the agent where it belongs.
+`canary` is the anti-sycophancy test: run the council on
+[`references/canary/FIXTURE.md`](./skills/shiproom/references/canary/FIXTURE.md) with any
+new model — if the verdict comes back cheerful, the protocol failed, not passed.
+
+> **Note — npm.** Shiproom is not published to npm, and the unscoped name `shiproom`
+> belongs to an unrelated package: never run `npx shiproom`. If a standalone CLI is
+> published later, it will be under a scoped name such as `@nicobts/shiproom`.
 
 ## The verdict page — summary on the bench, depth one click deeper
 
@@ -108,8 +122,8 @@ watch, and 3–5 prioritized recommendations. The verdict tells you the decision
 filings tell you what to do about it.
 
 
-The run writes `verdict.json`; drop `dashboard/index.html` next to it and serve
-(`python3 -m http.server`). You get the bench (one seat, one vote, at a glance), the
+The run writes `.council/verdict.json`; `/shiproom verdict` (or the helper's `view`)
+serves the page locally. You get the bench (one seat, one vote, at a glance), the
 tally, every seat's argument with its flip condition, and the pre-committed go/no-go
 thresholds. Single file, zero build, no accounts, no telemetry — nobody is farming you.
 
@@ -120,7 +134,7 @@ directly, one question at a time — answers must be numbers, facts, names, or d
 Dodge twice and the question is recorded verbatim as an **open wound** in your verdict.
 Answer well and seats revise their votes; the Chair re-tallies. Frank, not cruel: the
 protocol bans insults and theatrics — specificity is the aggression. See
-[`council/GRILL.md`](./council/GRILL.md).
+[`references/GRILL.md`](./skills/shiproom/references/GRILL.md).
 
 ## The Docket
 
@@ -158,25 +172,63 @@ translation: your agent runs the council in your language natively.
 A new seat or council template is a ~30-line markdown file: mandate, kill question,
 verdict semantics. Grant Reviewer for nonprofits, Game Designer, PhD Advisor, Clinical
 Regulator — if you know a vantage point that kills bad ideas, PR it. See
-`council/CHARTER.md` for the invariants (the ICP seat and the Chair are never removed;
+[`references/CHARTER.md`](./skills/shiproom/references/CHARTER.md) for the invariants (the ICP seat and the Chair are never removed;
 the verdict format is mandatory everywhere).
 
 ## Repository layout
 
 ```
-SHIPROOM.md                    one-file zero-install edition — paste into any AI
-AGENTS.md                     canonical agent instructions (cross-tool standard)
-CLAUDE.md / GEMINI.md         thin pointers for Claude Code and Gemini CLI
-council/CHARTER.md            the protocol: seats, ground rules, verdict format
-council/verdict.schema.json   output contract
-council/examples/             a full sample verdict
-skills/shiproom/    portable SKILL.md
-dashboard/index.html          the verdict page (single file, zero build)
-commands/shiproom.md           the /shiproom dispatcher (slash-command harnesses)
-council/flows/                guided multi-step flows: scope, run, grill, verdict, docket
-scripts/build-dist.sh         builds per-harness bundles (dist/claude-code, dist/cursor, ...)
-docket/                       published verdicts — #001 is this repo judging itself
+skills/shiproom/                   the Agent Skill — self-contained, install this folder
+  SKILL.md                         entry point: subcommands, global rules, helper usage
+  references/CHARTER.md            the protocol: seats, ground rules, verdict format
+  references/GRILL.md              interrogation rules and tone clause
+  references/flows/                guided flows: scope, run, grill, verdict, docket
+  references/verdict.schema.json   output contract
+  references/canary/FIXTURE.md     flawed fixture project for drift checks
+  references/examples/             a full sample verdict
+  assets/dashboard.html            the verdict page (single file, zero build)
+  scripts/shiproom.js              zero-dependency helper: validate, view, card, docket, canary
+.claude-plugin/                    Claude Code plugin + marketplace manifests
+SHIPROOM.md                        one-file zero-install edition — paste into any AI
+docket/                            published verdicts — #001 is this repo judging itself
+tests/                             node:test suite for the helper (npm test)
 ```
+
+## Roadmap
+
+### Next steps
+
+- [x] Self-contained Agent Skill layout — installable with `npx skills add`
+- [x] Claude Code plugin and marketplace manifests
+- [x] Helper script validates against the full schema, serves on localhost only, and is
+      covered by tests in CI (Node 18, 20, 22)
+- [ ] Verify the install end to end in Claude Code (plugin and `npx skills`), Codex,
+      Cursor, Gemini CLI and OpenCode
+- [ ] Tag the first release, `v0.3.0`, with release notes
+- [ ] Record a 20-second demo of a verdict landing and embed it at the top of this README
+- [ ] Submit to skill and plugin directories (skills.sh, Claude Code plugin marketplaces)
+
+### Recommended improvements
+
+- [ ] Publish a second Docket entry with a SHELVE verdict, to show the council kills
+      ideas and not just blesses its author's
+- [ ] Run the canary in CI against stored reference verdicts, one that must pass and one
+      that must fail
+- [ ] Generate `SHIPROOM.md` from `references/` so the paste-anywhere edition cannot drift
+      from the charter
+- [ ] Alternative benches as templates: nonprofit, research project, internal tool
+- [ ] Issue templates for new seats and Docket submissions
+- [ ] A one-command PNG export for the share card
+
+### Possible later
+
+- [ ] Scoped npm package (`@nicobts/shiproom`) exposing the helper as a standalone CLI
+- [ ] Gemini CLI extension and Codex plugin manifests, alongside the Claude Code plugin
+- [ ] Multi-model benches as a first-class option, with the model per seat recorded in
+      `verdict.json`
+- [ ] Measure verdict stability: repeat runs across models and report how often the
+      decision changes
+- [ ] A Docket gallery on GitHub Pages, filterable by decision
 
 ## Honest limitation
 

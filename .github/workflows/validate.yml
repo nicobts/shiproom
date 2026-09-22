@@ -6,6 +6,19 @@ on:
   pull_request:
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Unit tests
+        run: npm test
+
   verdicts:
     runs-on: ubuntu-latest
     steps:
@@ -17,12 +30,22 @@ jobs:
         run: |
           set -e
           found=0
-          for f in $(find docket council/examples example -name 'verdict.json' 2>/dev/null); do
+          for f in $(find docket skills/shiproom/references/examples -name '*verdict.json' 2>/dev/null); do
             found=1
             echo "::group::$f"
-            node cli/index.js validate "$f"
+            node skills/shiproom/scripts/shiproom.js validate "$f"
             echo "::endgroup::"
           done
           [ "$found" = "1" ] || { echo "no verdict.json files found"; exit 1; }
-      - name: CLI smoke test
-        run: node cli/index.js --help
+      - name: Plugin and skill manifests are valid JSON with matching versions
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = [
+              JSON.parse(fs.readFileSync(".claude-plugin/plugin.json")).version,
+              JSON.parse(fs.readFileSync("package.json")).version,
+              fs.readFileSync("skills/shiproom/SKILL.md", "utf8").match(/version:\s*"([^"]+)"/)[1],
+            ];
+            JSON.parse(fs.readFileSync(".claude-plugin/marketplace.json"));
+            if (new Set(v).size !== 1) { console.error("version mismatch:", v); process.exit(1); }
+            console.log("manifests ok, version", v[0]);'
