@@ -6,7 +6,7 @@ Before launching, we ran the Council on this very repo. This is the first entry 
 public Docket, and the dissent below is the product working.
 
 **[View the interactive verdict page →](https://nicobts.github.io/shiproom/docket/001-shiproom/)**
-(or serve this folder locally: `npx shiproom view` / `python3 -m http.server`)
+(or serve this folder locally: `shiproom view` / `python3 -m http.server`)
 
 ## The bench
 

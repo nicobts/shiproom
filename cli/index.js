@@ -90,7 +90,7 @@ function cmdInit(args) {
     { flag: '--claude', detect: '.claude', install: () => {
         cpDir(path.join(PKG_ROOT, 'skills'), path.join(CWD, '.claude', 'skills'));
         fs.mkdirSync(path.join(CWD, '.claude', 'commands'), { recursive: true });
-        fs.copyFileSync(path.join(PKG_ROOT, 'commands', 'council.md'), path.join(CWD, '.claude', 'commands', 'council.md'));
+        fs.copyFileSync(path.join(PKG_ROOT, 'commands', 'shiproom.md'), path.join(CWD, '.claude', 'commands', 'shiproom.md'));
         if (!fs.existsSync(path.join(CWD, 'CLAUDE.md'))) fs.copyFileSync(path.join(PKG_ROOT, 'CLAUDE.md'), path.join(CWD, 'CLAUDE.md'));
       }, name: 'Claude Code (.claude/commands + skills)' },
     { flag: '--cursor', detect: '.cursor', install: () => cpDir(path.join(PKG_ROOT, 'skills'), path.join(CWD, '.cursor', 'skills')), name: 'Cursor (.cursor/skills)' },

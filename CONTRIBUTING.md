@@ -32,7 +32,7 @@ docket/NNN-your-project/
   verdict.json    required — must validate against council/verdict.schema.json
   README.md       required — tally, one line per seat, your thresholds
   index.html      optional — copy of dashboard/index.html for the interactive page
-  card.svg        optional — share card (npx shiproom card)
+  card.svg        optional — share card (shiproom card)
 ```
 
 Use the next free `NNN`. Validate before pushing:

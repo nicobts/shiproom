@@ -43,8 +43,11 @@ cd your-project
 node ../shiproom/cli/index.js init   # auto-detects your harness
 ```
 
-(Once the npm package is published: `npx shiproom init`. Everything is plain
-markdown plus one HTML file — copying the folders by hand also works.)
+No `.claude/`, `.cursor/`, `.agents/` or `.gemini/` folder yet? Pass the harness
+explicitly: `init --claude` (or `--cursor`, `--codex`, `--gemini`, `--all`).
+
+Shiproom is not on npm yet — run the CLI from your clone as above. Everything is plain
+markdown plus one HTML file, so copying the folders by hand also works.
 
 Then, in your agent:
 
@@ -79,10 +82,11 @@ harnesses (Codex, Cursor, Copilot, Gemini CLI, OpenCode) get the same flows via
 ## The CLI — plumbing, not thinking
 
 The deliberation runs in *your* agent (skill-first, near-zero context cost while idle);
-a zero-dependency CLI handles the deterministic parts:
+a zero-dependency CLI (Node 18+) handles the deterministic parts. `shiproom` below means
+`node <path-to-clone>/cli/index.js`, or plain `shiproom` after `npm link` in the clone:
 
 ```
-npx shiproom init   install into a project (detects Claude Code/Cursor/Codex/Gemini)
+shiproom init                  install into a project (detects Claude Code/Cursor/Codex/Gemini)
 shiproom validate              check a verdict.json against the protocol contract
 shiproom view                  serve the verdict page locally
 shiproom card                  generate a 1200×630 share image from a verdict

@@ -12,8 +12,9 @@ rendered by an interactive dashboard.
 
 ## CLI integration (prefer when available)
 
-Check once per session whether the utility CLI is installed (`shiproom --help` exits 0,
-or `npx shiproom --help`). If yes, use it for the deterministic steps instead
+Check once per session whether the utility CLI is installed (`shiproom --help` exits 0).
+Never probe with `npx shiproom`: that npm name belongs to an unrelated package.
+If it is installed, use it for the deterministic steps instead
 of doing them manually: `shiproom validate` (schema check after writing verdict.json),
 `shiproom view` (serve the verdict page), `shiproom card` (1200×630 share image),
 `shiproom docket` (package for publishing), `shiproom canary` (drift check on fixture
