@@ -10,7 +10,7 @@
 
 ## 完整版(适配所有主流编码智能体)
 
-克隆仓库后在你的项目中运行 `node ../shiproom/cli/index.js init`(自动检测 Claude Code / Cursor / Codex / Gemini)。在 Claude Code 中:`/shiproom scope` → `/shiproom run` → `/shiproom grill`(质询模式:席位直接向**你**提问,回避两次的问题将被原文记录为"未愈之伤")→ `/shiproom docket`(发布判决)。
+以 skill 形式安装:`npx skills add nicobts/shiproom`(Claude Code、Codex、Cursor、Gemini CLI、OpenCode 等),或在 Claude Code 中运行 `/plugin marketplace add nicobts/shiproom`。在 Claude Code 中:`/shiproom scope` → `/shiproom run` → `/shiproom grill`(质询模式:席位直接向**你**提问,回避两次的问题将被原文记录为"未愈之伤")→ `/shiproom docket`(发布判决)。
 
 ## 为什么有效
 

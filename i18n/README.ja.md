@@ -10,7 +10,7 @@ AI にプロジェクトの評価を求めると、返ってくるのはお世�
 
 ## フル版(主要なコーディングエージェントすべてに対応)
 
-リポジトリをクローンし、プロジェクト内で `node ../shiproom/cli/index.js init` を実行(Claude Code / Cursor / Codex / Gemini を自動検出)。Claude Code では:`/shiproom scope` → `/shiproom run` → `/shiproom grill`(尋問モード:議席が**あなた**に直接質問。二度はぐらかした質問は「open wound(未回答の傷)」として原文のまま記録)→ `/shiproom docket`(評決の公開)。
+スキルとしてインストール:`npx skills add nicobts/shiproom`(Claude Code、Codex、Cursor、Gemini CLI、OpenCode など)、または Claude Code で `/plugin marketplace add nicobts/shiproom`。Claude Code では:`/shiproom scope` → `/shiproom run` → `/shiproom grill`(尋問モード:議席が**あなた**に直接質問。二度はぐらかした質問は「open wound(未回答の傷)」として原文のまま記録)→ `/shiproom docket`(評決の公開)。
 
 ## なぜ機能するのか
 

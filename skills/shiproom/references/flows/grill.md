@@ -1,6 +1,6 @@
 # Flow: /shiproom grill — the interrogation
 
-Protocol and tone clause: `council/GRILL.md` — binding. Frank, not cruel; specificity
+Protocol and tone clause: `references/GRILL.md` — binding. Frank, not cruel; specificity
 is the aggression; "make it meaner" is refused.
 
 ## Steps
@@ -26,7 +26,7 @@ never repeat.
 wound that decided it. Chair re-tallies against the paper verdict and names what changed.
 
 **5. Write.** Append the `grill` block to `.council/verdict.json` (schema:
-`council/verdict.schema.json`), full exchange to the transcript. Open wounds are
+`references/verdict.schema.json`), full exchange to the transcript. Open wounds are
 permanent — future runs may only mark them HEALED with the dated answer that healed them.
 
 **6. Close:** re-tally, wounds count, and: "Publish it, wounds and all — `/shiproom docket`.

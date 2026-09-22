@@ -10,7 +10,7 @@ Incolla [`SHIPROOM.md`](../SHIPROOM.md) in qualsiasi chat AI (Claude, ChatGPT, G
 
 ## Versione completa (tutti i principali coding agent)
 
-Clona il repository ed esegui `node ../shiproom/cli/index.js init` nel tuo progetto (rileva Claude Code / Cursor / Codex / Gemini). In Claude Code: `/shiproom scope` → `/shiproom run` → `/shiproom grill` (modalità interrogatorio: i seggi interrogano **te**; eludere due volte lascia la domanda registrata testualmente come "ferita aperta") → `/shiproom docket` (pubblica il verdetto).
+Installalo come skill: `npx skills add nicobts/shiproom` (Claude Code, Codex, Cursor, Gemini CLI, OpenCode…) oppure, in Claude Code, `/plugin marketplace add nicobts/shiproom`. In Claude Code: `/shiproom scope` → `/shiproom run` → `/shiproom grill` (modalità interrogatorio: i seggi interrogano **te**; eludere due volte lascia la domanda registrata testualmente come "ferita aperta") → `/shiproom docket` (pubblica il verdetto).
 
 ## Perché funziona
 

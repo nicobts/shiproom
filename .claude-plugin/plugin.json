@@ -1,0 +1,13 @@
+{
+  "name": "shiproom",
+  "version": "0.3.0",
+  "description": "The go/no-go room for your idea: an adversarial AI council (CTO, CFO, VC, CMO, CEO, your customer, a Chair) that won't tell you it's great.",
+  "author": {
+    "name": "Nicolas Bossi",
+    "url": "https://github.com/nicobts"
+  },
+  "homepage": "https://github.com/nicobts/shiproom",
+  "repository": "https://github.com/nicobts/shiproom",
+  "license": "MIT",
+  "keywords": ["idea-validation", "adversarial", "council", "red-team", "startup"]
+}
