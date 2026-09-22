@@ -47,6 +47,13 @@ CI runs the same check on every PR. Two rules:
   is the product.
 - **SHELVE verdicts are especially welcome.** Getting roasted well is a badge of honor.
 
+## How changes land
+
+Shiproom uses GitHub Flow. `main` is protected: every change arrives through a pull
+request from a short-lived branch (`feat/…`, `fix/…`, `docs/…`, `chore/…`), and CI must
+pass (tests on Node 18, 20 and 22, plus verdict validation) before merging. Releases are
+tags (`v0.3.0`, …) on `main`; tags are protected too.
+
 ## Ground rules for all PRs
 
 - Zero dependencies stays zero dependencies (helper script and dashboard).
