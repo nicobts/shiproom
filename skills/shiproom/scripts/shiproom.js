@@ -185,7 +185,9 @@ function cardSvg(d, themeName) {
   const vc = t.vote[dec];
   const counts = {};
   d.members.forEach(m => counts[m.vote] = (counts[m.vote] || 0) + 1);
-  const present = ['SHIP_AND_SEE', 'INVEST', 'SHELVE', 'ABSTAIN'].filter(v => counts[v]);
+  // Majority first, so the score reads 6–1 for a 6–1 decision, not 1–6.
+  const order = ['SHIP_AND_SEE', 'INVEST', 'SHELVE', 'ABSTAIN'];
+  const present = order.filter(v => counts[v]).sort((x, y) => counts[y] - counts[x] || order.indexOf(x) - order.indexOf(y));
   const score = present.map(v => counts[v]).join('–');
   const scoreLabel = present.map(v => VOTE_LABEL[v].toUpperCase()).join(' · ');
   const titleSize = Math.max(38, Math.min(64, Math.floor(1150 / Math.max(8, d.project.length))));

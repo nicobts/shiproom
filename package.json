@@ -1,6 +1,6 @@
 {
   "name": "shiproom",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Shiproom — the go/no-go room for your idea. An adversarial AI council that won't tell you your idea is great. Ships as an Agent Skill and a Claude Code plugin.",
   "bin": {

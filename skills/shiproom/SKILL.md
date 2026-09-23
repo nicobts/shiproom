@@ -3,7 +3,7 @@ name: shiproom
 description: Run an adversarial seven-seat validation council (CTO, CFO, VC, CMO, CEO, target customer, Chair) that stress-tests a project idea and returns a structured INVEST / SHIP_AND_SEE / SHELVE verdict with pre-committed go/no-go thresholds. Use when the user wants to validate a project, product idea, or side project before committing resources; when they ask "is this worth building", "should I turn this into a SaaS", "evaluate my idea", or want a red-team / devil's-advocate review of a business plan. Supports the subcommands scope, run, grill, verdict, and docket.
 license: MIT
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
   homepage: https://github.com/nicobts/shiproom
 ---
 

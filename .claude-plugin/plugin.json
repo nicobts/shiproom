@@ -1,6 +1,6 @@
 {
   "name": "shiproom",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The go/no-go room for your idea: an adversarial AI council (CTO, CFO, VC, CMO, CEO, your customer, a Chair) that won't tell you it's great.",
   "author": {
     "name": "Nicolas Bossi",

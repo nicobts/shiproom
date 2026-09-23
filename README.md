@@ -147,6 +147,7 @@ getting roasted well is a badge of honor.
 | # | Project | Verdict | Tally |
 |---|---------|---------|-------|
 | 001 | [Shiproom (this repo)](./docket/001-shiproom/) | Ship & See | 5–1–1, VC dissenting |
+| 002 | [PetChain (the drift-check fixture)](./docket/002-petchain/) | Shelve | 6–1, CMO dissenting |
 
 ## Honest limitation
 

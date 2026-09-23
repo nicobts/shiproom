@@ -546,7 +546,9 @@ function render(d){
 
   const tally = {};
   d.members.forEach(m => tally[m.vote] = (tally[m.vote]||0)+1);
-  const ordered = VOTE_ORDER.filter(v => tally[v]).concat(Object.keys(tally).filter(v => !VOTE_ORDER.includes(v)));
+  // Majority first, so the score reads 6–1 for a 6–1 decision, not 1–6.
+  const ordered = VOTE_ORDER.filter(v => tally[v]).concat(Object.keys(tally).filter(v => !VOTE_ORDER.includes(v)))
+    .sort((x, y) => tally[y] - tally[x] || VOTE_ORDER.indexOf(x) - VOTE_ORDER.indexOf(y));
 
   /* ruling */
   $('verdict').style.setProperty('--vc', colorOf(dec));

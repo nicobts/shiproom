@@ -18,12 +18,12 @@ are intentions, not promises. Suggestions are welcome as issues.
 
 ### Recommended improvements
 
-- [ ] Publish a second Docket entry with a SHELVE verdict, to show the council kills
-      ideas and not just blesses its author's
+- [x] Publish a second Docket entry with a SHELVE verdict, to show the council kills
+      ideas and not just blesses its author's — [#002 PetChain](./docket/002-petchain/)
 - [x] Dark and light themes on the verdict page and the share card, matching the site
 - [x] Published entries rebuilt from their verdicts, with social preview cards
 - [ ] Run the canary in CI against stored reference verdicts, one that must pass and one
-      that must fail
+      that must fail — [#002](./docket/002-petchain/) is the passing reference
 - [ ] Generate `SHIPROOM.md` from `references/` so the paste-anywhere edition cannot drift
       from the charter
 - [ ] Alternative benches as templates: nonprofit, research project, internal tool
