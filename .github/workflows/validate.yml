@@ -19,6 +19,27 @@ jobs:
       - name: Unit tests
         run: npm test
 
+  # A published verdict is the record: the page around it may be rebuilt, the verdict
+  # itself is never edited. Adding new entries is fine; changing an existing one is not.
+  immutable-verdicts:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No published verdict.json may be modified
+        run: |
+          set -e
+          base="origin/${{ github.base_ref }}"
+          changed=$(git diff --diff-filter=MDR --name-only "$base"...HEAD -- 'docket/*/verdict.json')
+          if [ -n "$changed" ]; then
+            echo "::error::published verdicts are never edited — this PR changes:"
+            echo "$changed"
+            exit 1
+          fi
+          echo "no published verdict was modified"
+
   verdicts:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +58,9 @@ jobs:
             echo "::endgroup::"
           done
           [ "$found" = "1" ] || { echo "no verdict.json files found"; exit 1; }
+      - name: Published Docket entries match the current verdict page and card
+        run: node tools/docket-build.js --check
+
       - name: Plugin and skill manifests are valid JSON with matching versions
         run: |
           node -e '

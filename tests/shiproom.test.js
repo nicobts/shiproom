@@ -143,6 +143,27 @@ test('docket removes a stale card.png when the render fails', () => {
   assert.match(r.stdout, /\(verdict\.json, index\.html, README\.md, card\.svg\)/, 'card.png must not be reported as written');
 });
 
+test('published entries carry static metadata for crawlers', () => {
+  const { entryHtml, metaTags } = require('../skills/shiproom/scripts/shiproom.js');
+  const d = sample();
+  const html = entryHtml(d, { url: 'https://example.test/docket/x/', image: 'https://example.test/docket/x/card.png' });
+  assert.ok(html.includes('<meta property="og:image" content="https://example.test/docket/x/card.png">'));
+  assert.ok(html.includes('<meta property="og:url" content="https://example.test/docket/x/">'));
+  assert.strictEqual(html.match(/<title>/g).length, 1, 'exactly one title tag');
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(html, new RegExp('<title>' + d.project + ' — '));
+  assert.match(html, /"sample": false|"sample": true/, 'the verdict is baked into the page');
+  assert.doesNotMatch(metaTags(d), /undefined/);
+  // Escaping: a project name with markup must not break out of the tag.
+  const risky = { ...d, project: 'A "<script>" project' };
+  assert.doesNotMatch(metaTags(risky), /<script>/);
+});
+
+test('the Docket is in sync with the current verdict page and card', () => {
+  const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'docket-build.js'), '--check'], { cwd: ROOT, encoding: 'utf8' });
+  assert.strictEqual(r.status, 0, r.stdout + r.stderr);
+});
+
 test('canary fails a cheerful run and passes a critical one', () => {
   const dir = tmpDir();
   const cheerful = sample();

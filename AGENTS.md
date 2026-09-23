@@ -16,6 +16,10 @@ This repository **is** the Shiproom skill. To *run* a council, load
 - `tests/` — `node:test` suite for the helper script.
 - `tools/embed-assets.js` — re-embeds the fonts and `assets/council.jpg` into the verdict
   page after either changes; a test fails if the page is stale.
+- `tools/docket-build.js` — rebuilds every `docket/*/index.html` and `card.svg` (and
+  `card.png`) from its `verdict.json`, with social metadata. Run it after changing the
+  verdict page or the card design; `--check` fails when the Docket is stale, and CI runs
+  it. It never touches `verdict.json` or an entry's `README.md`.
 
 ## Rules
 

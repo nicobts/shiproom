@@ -282,19 +282,53 @@ function cmdCard(args) {
 }
 
 /* ---------- docket ---------- */
+const slugOf = (d) => d.project.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'project';
+
+// Crawlers do not run the page's JavaScript, so a published entry carries static
+// metadata: the verdict in the title, the summary as the description, the card as the
+// preview image. `links` supplies absolute URLs when the entry's address is known.
+function metaTags(d, links = {}) {
+  const dec = (d.grill && d.grill.finalDecision) || d.verdict.decision;
+  // "Shiproom — Ship & See · Shiproom verdict" reads badly when the project is Shiproom.
+  const suffix = /shiproom/i.test(d.project) ? 'Council verdict' : 'Shiproom verdict';
+  const title = `${d.project} — ${VOTE_LABEL[dec]} · ${suffix}`;
+  const desc = `${tallyOf(d)}. ${firstSentence(d.verdict.summary)}`.slice(0, 300);
+  const tags = [
+    `<title>${esc(title)}</title>`,
+    `<meta name="description" content="${esc(desc)}">`,
+    `<meta property="og:title" content="${esc(title)}">`,
+    `<meta property="og:description" content="${esc(desc)}">`,
+    `<meta property="og:type" content="article">`,
+    `<meta property="og:site_name" content="Shiproom">`,
+    `<meta property="og:image" content="${esc(links.image || 'card.png')}">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+  ];
+  if (links.url) tags.push(`<meta property="og:url" content="${esc(links.url)}">`);
+  return tags.join('\n');
+}
+
+// A published entry is the verdict page with this verdict baked in, so it renders as a
+// static file with no fetch, and carries metadata a crawler can read.
+function entryHtml(d, links = {}) {
+  const tpl = fs.readFileSync(DASHBOARD, 'utf8');
+  const m = tpl.match(/const SAMPLE = [\s\S]*?;(\r?\n){2}const VOTE_LABEL/);
+  if (!m) fail(`verdict page anchor not found in ${DASHBOARD}`);
+  const nl = m[1];
+  const html = tpl.slice(0, m.index) + `const SAMPLE = ${JSON.stringify(d, null, 2)};${nl}${nl}const VOTE_LABEL` + tpl.slice(m.index + m[0].length);
+  const a = html.indexOf('<!-- shiproom:meta'), b = html.indexOf('<!-- /shiproom:meta -->');
+  if (a === -1 || b === -1) fail(`meta markers not found in ${DASHBOARD}`);
+  return html.slice(0, a) + '<!-- shiproom:meta -->' + nl + metaTags(d, links) + nl + html.slice(b);
+}
+
 function cmdDocket(args) {
   const { d } = loadValidVerdict(positional(args));
   d.sample = false;
-  const slug = d.project.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'project';
-  const dir = path.join(CWD, 'docket-entry', `${d.date}-${slug}`);
-  const tpl = fs.readFileSync(DASHBOARD, 'utf8');
-  const m = tpl.match(/const SAMPLE = [\s\S]*?;(\r?\n){2}const VOTE_LABEL/);
-  if (!m) fail(`dashboard template anchor not found in ${DASHBOARD}`);
-  const nl = m[1];
+  const dir = path.join(CWD, 'docket-entry', `${d.date}-${slugOf(d)}`);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'verdict.json'), JSON.stringify(d, null, 2));
-  fs.writeFileSync(path.join(dir, 'index.html'),
-    tpl.slice(0, m.index) + `const SAMPLE = ${JSON.stringify(d, null, 2)};${nl}${nl}const VOTE_LABEL` + tpl.slice(m.index + m[0].length));
+  fs.writeFileSync(path.join(dir, 'index.html'), entryHtml(d));
   const dec = (d.grill && d.grill.finalDecision) || d.verdict.decision;
   const story = (d.verdict.disagreement || d.verdict.summary).split(/(?<=\.)\s/)[0];
   fs.writeFileSync(path.join(dir, 'README.md'),
@@ -356,14 +390,20 @@ Usage: node <skill>/scripts/shiproom.js <command> [args]
 Run the council itself from your agent: "/shiproom scope".`;
 
 const commands = { validate: cmdValidate, view: cmdView, card: cmdCard, docket: cmdDocket, canary: cmdCanary };
-const [,, cmd, ...rest] = process.argv;
-if (cmd === '--version' || cmd === '-v') { log(VERSION); process.exit(0); }
-if (!cmd || cmd === '--help' || cmd === '-h') { log(HELP); process.exit(0); }
-if (!commands[cmd]) { console.error(`✗ Unknown command "${cmd}"\n`); console.error(HELP); process.exit(1); }
-try {
-  commands[cmd](rest);
-} catch (e) {
-  if (!(e instanceof UserError)) throw e;
-  console.error(`✗ ${e.message}`);
-  process.exit(1);
+
+// Also loaded as a module by tools/docket-build.js, which republishes the Docket.
+module.exports = { cardSvg, entryHtml, metaTags, slugOf, verdictErrors, findBrowser, renderPng, VERSION };
+
+if (require.main === module) {
+  const [, , cmd, ...rest] = process.argv;
+  if (cmd === '--version' || cmd === '-v') { log(VERSION); process.exit(0); }
+  if (!cmd || cmd === '--help' || cmd === '-h') { log(HELP); process.exit(0); }
+  if (!commands[cmd]) { console.error(`✗ Unknown command "${cmd}"\n`); console.error(HELP); process.exit(1); }
+  try {
+    commands[cmd](rest);
+  } catch (e) {
+    if (!(e instanceof UserError)) throw e;
+    console.error(`✗ ${e.message}`);
+    process.exit(1);
+  }
 }
