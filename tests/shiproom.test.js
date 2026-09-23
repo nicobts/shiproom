@@ -13,7 +13,7 @@ const SCRIPT = path.join(ROOT, 'skills', 'shiproom', 'scripts', 'shiproom.js');
 const SAMPLE = path.join(ROOT, 'skills', 'shiproom', 'references', 'examples', 'sample.verdict.json');
 const DOCKET_001 = path.join(ROOT, 'docket', '001-shiproom', 'verdict.json');
 
-const run = (args, cwd = ROOT) => spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: 'utf8' });
+const run = (args, cwd = ROOT, env = {}) => spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
 const tmpDir = () => fs.mkdtempSync(path.join(os.tmpdir(), 'shiproom-test-'));
 const sample = () => JSON.parse(fs.readFileSync(SAMPLE, 'utf8'));
 function writeVerdict(dir, data) {
@@ -75,16 +75,45 @@ test('validate finds .council/verdict.json by default', () => {
   assert.strictEqual(run(['validate'], tmpDir()).status, 1);
 });
 
-test('card writes an SVG next to the verdict and refuses invalid input', () => {
+test('card writes a themed SVG with embedded fonts and refuses invalid input', () => {
   const dir = tmpDir();
   const p = writeVerdict(dir, sample());
   assert.strictEqual(run(['card', p]).status, 0);
   const svg = fs.readFileSync(path.join(dir, 'card.svg'), 'utf8');
   assert.match(svg, /^<svg/);
-  assert.doesNotMatch(svg, /undefined/);
-  const bad = tmpDir();
-  assert.strictEqual(run(['card', writeVerdict(bad, { project: 'x' })]).status, 1);
-  assert.ok(!fs.existsSync(path.join(bad, 'card.svg')));
+  assert.match(svg, /@font-face\{font-family:'Fraunces'/);
+  assert.match(svg, /#0A111C/, 'dark theme by default');
+  assert.match(svg, /DISSENT|UNANIMOUS/);
+  assert.doesNotMatch(svg.replace(/<style>[\s\S]*?<\/style>/, ''), /undefined|NaN/, 'outside the embedded fonts');
+
+  assert.strictEqual(run(['card', p, '--theme=light']).status, 0);
+  assert.match(fs.readFileSync(path.join(dir, 'card.svg'), 'utf8'), /#F4F6F9/);
+  const bad = run(['card', p, '--theme=neon']);
+  assert.strictEqual(bad.status, 1);
+  assert.match(bad.stderr, /Unknown theme/);
+
+  const invalid = tmpDir();
+  assert.strictEqual(run(['card', writeVerdict(invalid, { project: 'x' })]).status, 1);
+  assert.ok(!fs.existsSync(path.join(invalid, 'card.svg')));
+});
+
+test('card --png renders a 1200x630 PNG when a browser is available', (t) => {
+  const probe = run(['card', writeVerdict(tmpDir(), sample()), '--png']);
+  if (probe.status !== 0 && /No Chrome, Edge or Chromium/.test(probe.stderr)) return t.skip('no browser installed');
+  const dir = tmpDir();
+  const r = run(['card', writeVerdict(dir, sample()), '--png']);
+  assert.strictEqual(r.status, 0, r.stderr);
+  const png = fs.readFileSync(path.join(dir, 'card.png'));
+  assert.strictEqual(png.toString('latin1', 1, 4), 'PNG');
+  assert.strictEqual(png.readUInt32BE(16), 1200);
+  assert.strictEqual(png.readUInt32BE(20), 630);
+});
+
+test('the verdict page embeds the current fonts and artwork', () => {
+  const { embed, PAGE } = require('../tools/embed-assets.js');
+  const html = fs.readFileSync(PAGE, 'utf8').replace(/\r\n/g, '\n');
+  assert.strictEqual(embed(html), html, 'run: node tools/embed-assets.js');
+  assert.match(html, /<style id="shiproom-hero">\s*\.hero\{background-image:url\(data:image\/jpeg/);
 });
 
 test('docket builds a self-contained entry', () => {
@@ -98,6 +127,20 @@ test('docket builds a self-contained entry', () => {
   assert.match(html, /"sample": false/);
   assert.ok(fs.existsSync(path.join(entry, 'README.md')));
   assert.strictEqual(run(['validate', path.join(entry, 'verdict.json')]).status, 0);
+});
+
+test('docket removes a stale card.png when the render fails', () => {
+  const dir = tmpDir();
+  const d = sample();
+  const p = writeVerdict(dir, d);
+  const entry = path.join(dir, 'docket-entry', `${d.date}-${d.project.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`);
+  fs.mkdirSync(entry, { recursive: true });
+  fs.writeFileSync(path.join(entry, 'card.png'), 'stale, not a PNG');
+  const r = run(['docket', p], dir, { SHIPROOM_BROWSER: path.join(dir, 'no-such-browser') });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.ok(!fs.existsSync(path.join(entry, 'card.png')), 'the stale PNG must not survive a failed render');
+  assert.match(r.stdout, /card\.png skipped/);
+  assert.match(r.stdout, /\(verdict\.json, index\.html, README\.md, card\.svg\)/, 'card.png must not be reported as written');
 });
 
 test('canary fails a cheerful run and passes a critical one', () => {

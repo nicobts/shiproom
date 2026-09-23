@@ -15,7 +15,6 @@ const DASHBOARD = path.join(SKILL_ROOT, 'assets', 'dashboard.html');
 const CWD = process.cwd();
 const VERSION = (fs.readFileSync(path.join(SKILL_ROOT, 'SKILL.md'), 'utf8').match(/^\s+version:\s*"?([\w.-]+)"?/m) || [])[1] || 'unknown';
 const VOTE_LABEL = { INVEST: 'Invest', SHIP_AND_SEE: 'Ship & See', SHELVE: 'Shelve', ABSTAIN: 'Abstain' };
-const VOTE_COLOR = { INVEST: '#1E6B4F', SHIP_AND_SEE: '#9A6B0B', SHELVE: '#9C3B2E', ABSTAIN: '#5B6770' };
 
 class UserError extends Error {}
 const log = (s) => console.log(s);
@@ -127,32 +126,159 @@ function tallyOf(d) {
   d.members.forEach(m => tally[m.vote] = (tally[m.vote] || 0) + 1);
   return Object.entries(tally).map(([v, n]) => `${VOTE_LABEL[v]} ${n}`).join(' · ');
 }
+const CARD_THEMES = {
+  dark: { bg: '#0A111C', bg2: '#0E1B2E', glow: '#46E0C6', panel: '#121D2E', rule: '#22334C', ink: '#E9EFF7', soft: '#A9B8CD', faint: '#7D8CA3', accent: '#46E0C6',
+    vote: { INVEST: '#52C98D', SHIP_AND_SEE: '#E4B44A', SHELVE: '#F0604C', ABSTAIN: '#8A96AC' }, glowOpacity: 0.55 },
+  light: { bg: '#F4F6F9', bg2: '#EAF1F3', glow: '#0F766E', panel: '#FFFFFF', rule: '#DCE3EC', ink: '#131C2A', soft: '#415069', faint: '#64738A', accent: '#0F766E',
+    vote: { INVEST: '#1C7A53', SHIP_AND_SEE: '#946300', SHELVE: '#B3382A', ABSTAIN: '#5C6B82' }, glowOpacity: 0 },
+};
+const CARD_FONTS = [
+  ['Fraunces', 'normal', '400 700', 'fraunces.woff2'],
+  ['Fraunces', 'italic', '400 700', 'fraunces-italic.woff2'],
+  ['Instrument Sans', 'normal', '400 600', 'instrument-sans.woff2'],
+  ['IBM Plex Mono', 'normal', '400', 'ibm-plex-mono-400.woff2'],
+  ['IBM Plex Mono', 'normal', '500', 'ibm-plex-mono-500.woff2'],
+];
+function embeddedFonts() {
+  return CARD_FONTS.map(([family, style, weight, file]) => {
+    const p = path.join(SKILL_ROOT, 'assets', 'fonts', file);
+    if (!fs.existsSync(p)) return '';
+    return `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};src:url(data:font/woff2;base64,${fs.readFileSync(p).toString('base64')}) format('woff2')}`;
+  }).join('');
+}
+// Greedy word wrap by character budget; the last kept line gets an ellipsis if text remains.
+function wrapText(text, maxChars, maxLines) {
+  const words = String(text).trim().split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    if (!line) line = w;
+    else if ((line + ' ' + w).length <= maxChars) line += ' ' + w;
+    else { lines.push(line); line = w; }
+  }
+  if (line) lines.push(line);
+  if (lines.length <= maxLines) return lines;
+  const kept = lines.slice(0, maxLines);
+  kept[maxLines - 1] = kept[maxLines - 1].replace(/[\s,;:.—–-]*\S*$/, '') + '…';
+  return kept;
+}
+const firstSentence = (s) => String(s || '').trim().split(/(?<=[.!?])\s/)[0];
+// Long sentences are cut at their first clause break (colon, semicolon, dash) and marked
+// with an ellipsis, so the card never ends mid-phrase and never alters the wording.
+function quoteText(s, max) {
+  const t = firstSentence(s);
+  if (t.length <= max) return t;
+  const m = t.slice(60, max).match(/[:;]|\s[—–]\s/);
+  return m ? t.slice(0, 60 + m.index).replace(/[\s,]+$/, '') + '…' : t;
+}
+// The dissent worth quoting: the seat furthest from the decision; the Chair if unanimous.
+function pickQuote(d, dec) {
+  const opposite = { INVEST: 'SHELVE', SHELVE: 'INVEST', SHIP_AND_SEE: 'SHELVE' }[dec];
+  const minority = d.members.filter(m => m.vote !== dec && m.vote !== 'ABSTAIN');
+  const m = minority.find(x => x.vote === opposite) || minority[0];
+  if (m) return { text: quoteText(m.argument, 180), who: `${m.role} · voted ${VOTE_LABEL[m.vote]} · dissent`, vote: m.vote };
+  return { text: quoteText(d.verdict.summary, 180), who: 'The Chair · unanimous bench', vote: dec };
+}
+function cardSvg(d, themeName) {
+  const t = CARD_THEMES[themeName];
+  const dec = (d.grill && d.grill.finalDecision) || d.verdict.decision;
+  const vc = t.vote[dec];
+  const counts = {};
+  d.members.forEach(m => counts[m.vote] = (counts[m.vote] || 0) + 1);
+  const present = ['SHIP_AND_SEE', 'INVEST', 'SHELVE', 'ABSTAIN'].filter(v => counts[v]);
+  const score = present.map(v => counts[v]).join('–');
+  const scoreLabel = present.map(v => VOTE_LABEL[v].toUpperCase()).join(' · ');
+  const titleSize = Math.max(38, Math.min(64, Math.floor(1150 / Math.max(8, d.project.length))));
+  const tagline = wrapText(d.tagline || '', 50, 2);
+  const q = pickQuote(d, dec);
+  const qLines = wrapText(q.text, 30, 6);
+  const qc = t.vote[q.vote];
+  const glowOn = t.glowOpacity > 0;
+  const n = d.members.length;
+  const span = 520, x0 = 90, step = n > 1 ? span / (n - 1) : 0;
+  const lights = d.members.map((m, i) => {
+    const cx = (x0 + i * step).toFixed(1), c = t.vote[m.vote];
+    return (glowOn ? `<circle cx="${cx}" cy="530" r="17" fill="${c}" opacity="${t.glowOpacity}" filter="url(#blur)"/>` : '') +
+      `<circle cx="${cx}" cy="530" r="15" fill="${c}"/>` +
+      `<text x="${cx}" y="572" text-anchor="middle" class="mono" font-size="14" font-weight="500" fill="${t.soft}">${esc(m.role)}</text>`;
+  }).join('\n  ');
+  const qy = 262;
+  const panelH = Math.max(250, 150 + qLines.length * 36);
+  const quote = qLines.map((l, i) => `<tspan x="752" y="${qy + i * 36}">${esc(l)}</tspan>`).join('');
+  const openWounds = (d.grill && d.grill.openWounds) || [];
+  const wounds = openWounds.length
+    ? `<text x="752" y="${qy + qLines.length * 36 + 40}" class="mono" font-size="13" letter-spacing="1.5" fill="${t.vote.SHELVE}">${openWounds.length} OPEN WOUND${openWounds.length > 1 ? 'S' : ''} ON RECORD</text>` : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <style>${embeddedFonts()}
+      .disp{font-family:'Fraunces',Georgia,serif}.sans{font-family:'Instrument Sans',system-ui,sans-serif}.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}</style>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${t.bg}"/><stop offset="1" stop-color="${t.bg2}"/></linearGradient>
+    <radialGradient id="halo" cx="18%" cy="0%" r="70%"><stop offset="0" stop-color="${t.glow}" stop-opacity="${glowOn ? 0.16 : 0.07}"/><stop offset="1" stop-color="${t.glow}" stop-opacity="0"/></radialGradient>
+    <filter id="blur" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="9"/></filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#ground)"/>
+  <rect width="1200" height="630" fill="url(#halo)"/>
+  <rect x="0" y="0" width="1200" height="6" fill="${vc}"/>
+  <text x="72" y="84" class="disp" font-size="28" font-weight="700" fill="${t.ink}">Shiproom<tspan fill="${t.accent}">.</tspan></text>
+  <text x="1128" y="82" text-anchor="end" class="mono" font-size="15" letter-spacing="2.5" fill="${t.faint}">VERDICT · ${esc(d.date)}</text>
+  <text x="72" y="178" class="disp" font-size="${titleSize}" font-weight="700" fill="${t.ink}">${esc(d.project)}</text>
+  ${tagline.map((l, i) => `<text x="72" y="${220 + i * 30}" class="sans" font-size="21" fill="${t.soft}">${esc(l)}</text>`).join('\n  ')}
+  <text x="72" y="330" class="mono" font-size="14" letter-spacing="3" fill="${t.accent}">THE COUNCIL RULES</text>
+  <text x="72" y="412" class="disp" font-size="84" font-weight="700" fill="${vc}">${esc(VOTE_LABEL[dec])}</text>
+  <text x="72" y="462" class="disp" font-size="34" font-weight="600" fill="${t.ink}">${esc(score)}<tspan dx="16" dy="-3" class="mono" font-size="13" font-weight="400" letter-spacing="1.5" fill="${t.faint}">${esc(scoreLabel)}</tspan></text>
+  <rect x="712" y="152" width="416" height="${panelH}" rx="16" fill="${t.panel}" stroke="${t.rule}"/>
+  <rect x="712" y="152" width="4" height="${panelH}" fill="${qc}"/>
+  <text x="742" y="222" class="disp" font-size="64" fill="${qc}">“</text>
+  <text class="disp" font-style="italic" font-size="25" fill="${t.ink}">${quote}</text>
+  <text x="752" y="${qy + qLines.length * 36 + 14}" class="mono" font-size="13" letter-spacing="1.5" fill="${qc}">${esc(q.who.toUpperCase())}</text>
+  ${wounds}
+  <path d="M ${x0 - 24} 588 Q ${x0 + span / 2} 612 ${x0 + span + 24} 588" fill="none" stroke="${t.rule}" stroke-width="1.5"/>
+  ${lights}
+  <text x="1128" y="590" text-anchor="end" class="mono" font-size="15" fill="${t.faint}">Run your own council → <tspan fill="${t.soft}">github.com/nicobts/shiproom</tspan></text>
+</svg>`;
+}
+// Social platforms do not accept SVG previews, so --png renders one with a local
+// Chrome, Edge or Chromium in headless mode (no npm dependency).
+function findBrowser() {
+  if (process.env.SHIPROOM_BROWSER) return process.env.SHIPROOM_BROWSER;
+  const candidates = process.platform === 'win32'
+    ? ['PROGRAMFILES', 'PROGRAMFILES(X86)', 'LOCALAPPDATA'].flatMap(k => process.env[k] ? [
+        path.join(process.env[k], 'Google', 'Chrome', 'Application', 'chrome.exe'),
+        path.join(process.env[k], 'Microsoft', 'Edge', 'Application', 'msedge.exe')] : [])
+    : process.platform === 'darwin'
+      ? ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge', '/Applications/Chromium.app/Contents/MacOS/Chromium']
+      : [];
+  for (const p of candidates) if (fs.existsSync(p)) return p;
+  const names = ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser', 'microsoft-edge'];
+  for (const dir of (process.env.PATH || '').split(path.delimiter)) {
+    for (const name of names) if (dir && fs.existsSync(path.join(dir, name))) return path.join(dir, name);
+  }
+  return null;
+}
+function renderPng(svgPath, pngPath) {
+  const browser = findBrowser();
+  if (!browser) fail('No Chrome, Edge or Chromium found for --png. Install one, or set SHIPROOM_BROWSER to its path.');
+  const { spawnSync } = require('child_process');
+  const { pathToFileURL } = require('url');
+  const r = spawnSync(browser, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1',
+    '--window-size=1200,630', `--screenshot=${pngPath}`, pathToFileURL(svgPath).href], { encoding: 'utf8', timeout: 60000 });
+  if (!fs.existsSync(pngPath)) fail(`PNG render failed with ${path.basename(browser)}: ${String(r.stderr || r.error || 'no output').trim().split('\n').pop()}`);
+}
 function cmdCard(args) {
   const { p, d } = loadValidVerdict(positional(args));
-  const dec = (d.grill && d.grill.finalDecision) || d.verdict.decision;
-  const seatW = 120, gap = 14, benchW = d.members.length * seatW + (d.members.length - 1) * gap;
-  const x0 = (1200 - benchW) / 2;
-  const seats = d.members.map((m, i) => {
-    const x = x0 + i * (seatW + gap);
-    return `<rect x="${x}" y="330" width="${seatW}" height="110" rx="10" fill="${VOTE_COLOR[m.vote]}"/>
-      <text x="${x + seatW/2}" y="470" text-anchor="middle" font-family="ui-monospace,monospace" font-size="19" fill="#8A96AC">${esc(m.role)}</text>`;
-  }).join('\n');
-  const wounds = d.grill && d.grill.openWounds && d.grill.openWounds.length
-    ? `<text x="600" y="560" text-anchor="middle" font-family="ui-monospace,monospace" font-size="20" fill="#C97A6D">${d.grill.openWounds.length} open wound${d.grill.openWounds.length>1?'s':''} on record</text>` : '';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#111A2B"/>
-  <rect x="0" y="0" width="1200" height="8" fill="${VOTE_COLOR[dec]}"/>
-  <text x="600" y="96" text-anchor="middle" font-family="ui-monospace,monospace" font-size="22" letter-spacing="4" fill="#7C89A0">SHIPROOM · VERDICT</text>
-  <text x="600" y="185" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="64" fill="#F5F7FA">${esc(d.project)}</text>
-  <text x="600" y="262" text-anchor="middle" font-family="Georgia,serif" font-size="52" fill="${VOTE_COLOR[dec]}">${esc(VOTE_LABEL[dec])}</text>
-  <text x="600" y="305" text-anchor="middle" font-family="ui-monospace,monospace" font-size="22" fill="#B4C0D3">${esc(tallyOf(d))}</text>
-  ${seats}
-  ${wounds}
-  <text x="600" y="602" text-anchor="middle" font-family="ui-monospace,monospace" font-size="19" fill="#7C89A0">Run your own council → github.com/nicobts/shiproom</text>
-</svg>`;
+  const theme = (args.find(a => a.startsWith('--theme=')) || '--theme=dark').split('=')[1];
+  if (!CARD_THEMES[theme]) fail(`Unknown theme "${theme}" — use --theme=dark or --theme=light`);
   const out = path.join(path.dirname(p), 'card.svg');
-  fs.writeFileSync(out, svg);
-  ok(`share card → ${path.relative(CWD, out)}  (1200×630; convert to PNG for social embeds, e.g. via resvg/Inkscape)`);
+  fs.writeFileSync(out, cardSvg(d, theme));
+  ok(`share card → ${path.relative(CWD, out)}  (1200×630, ${theme})`);
+  if (args.includes('--png')) {
+    const png = path.join(path.dirname(p), 'card.png');
+    if (fs.existsSync(png)) fs.unlinkSync(png);
+    renderPng(out, png);
+    ok(`share card → ${path.relative(CWD, png)}  (PNG for social previews)`);
+  } else {
+    log('  add --png to also write card.png (needs Chrome, Edge or Chromium); social platforms need PNG');
+  }
 }
 
 /* ---------- docket ---------- */
@@ -173,7 +299,17 @@ function cmdDocket(args) {
   const story = (d.verdict.disagreement || d.verdict.summary).split(/(?<=\.)\s/)[0];
   fs.writeFileSync(path.join(dir, 'README.md'),
 `# ${d.project} — Council Verdict\n\n- **Date:** ${d.date}\n- **Decision:** ${VOTE_LABEL[dec]}\n- **Tally:** ${tallyOf(d)}\n- **Story:** ${story}\n\nGenerated by the [Shiproom](https://github.com/nicobts/shiproom). Published verdicts are never edited.\n`);
-  ok(`docket entry → ${path.relative(CWD, dir)}/  (verdict.json, index.html, README.md)`);
+  fs.writeFileSync(path.join(dir, 'card.svg'), cardSvg(d, 'dark'));
+  let files = 'verdict.json, index.html, README.md, card.svg';
+  const png = path.join(dir, 'card.png');
+  if (fs.existsSync(png)) fs.unlinkSync(png); // a stale PNG would read as a successful render
+  if (findBrowser()) {
+    try { renderPng(path.join(dir, 'card.svg'), png); files += ', card.png'; }
+    catch (e) { log(`  · card.png skipped: ${e.message}`); }
+  } else {
+    log('  · card.png skipped: no Chrome, Edge or Chromium found (social previews need PNG)');
+  }
+  ok(`docket entry → ${path.relative(CWD, dir)}/  (${files})`);
   log('  PR this folder into the upstream repo\'s docket/ to publish.');
 }
 
@@ -209,7 +345,8 @@ Usage: node <skill>/scripts/shiproom.js <command> [args]
 
   validate  [path]               check a verdict.json against the schema and protocol rules
   view      [dir] [--port=4177]  serve the verdict page on 127.0.0.1
-  card      [path]               write a 1200×630 share card (card.svg) next to the verdict
+  card      [path] [--png] [--theme=dark|light]
+                                 write a 1200×630 share card (card.svg, optional card.png)
   docket    [path]               package a verdict for publishing to the public Docket
   canary    [path]               drift check on a council run of the flawed fixture
 
