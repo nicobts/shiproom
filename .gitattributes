@@ -1,0 +1,12 @@
+# Generated files and the skill's own assets stay LF in the working tree, so the
+# docket-build check compares like with like on Windows checkouts too.
+* text=auto
+*.html text eol=lf
+*.svg text eol=lf
+*.md text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.woff2 binary
+*.jpg binary
+*.png binary

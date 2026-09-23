@@ -59,6 +59,25 @@ request from a short-lived branch (`feat/…`, `fix/…`, `docs/…`, `chore/…
 pass (tests on Node 18, 20 and 22, plus verdict validation) before merging. Releases are
 tags (`v0.3.0`, …) on `main`; tags are protected too.
 
+## Repository layout
+
+```
+skills/shiproom/                   the Agent Skill — self-contained, install this folder
+  SKILL.md                         entry point: subcommands, global rules, helper usage
+  references/CHARTER.md            the protocol: seats, ground rules, verdict format
+  references/GRILL.md              interrogation rules and tone clause
+  references/flows/                guided flows: scope, run, grill, verdict, docket
+  references/verdict.schema.json   output contract
+  references/canary/FIXTURE.md     flawed fixture project for drift checks
+  references/examples/             a full sample verdict
+  assets/dashboard.html            the verdict page (single file, zero build)
+  scripts/shiproom.js              zero-dependency helper: validate, view, card, docket, canary
+.claude-plugin/                    Claude Code plugin + marketplace manifests
+SHIPROOM.md                        one-file zero-install edition — paste into any AI
+docket/                            published verdicts — #001 is this repo judging itself
+tests/                             node:test suite for the helper (npm test)
+```
+
 ## Ground rules for all PRs
 
 - Zero dependencies stays zero dependencies (helper script and dashboard).
