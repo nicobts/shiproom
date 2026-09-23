@@ -47,7 +47,9 @@ for (const dir of entries()) {
   for (const [file, content] of Object.entries(want)) {
     const target = path.join(dir, file);
     const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
-    if (current === content) continue;
+    // Compare without line endings: a Windows checkout may hold CRLF for the same content.
+    const same = (a, b) => a.split('\r\n').join('\n') === b.split('\r\n').join('\n');
+    if (current !== null && same(current, content)) continue;
     if (check) { stale.push(`${rel(dir)}/${file}`); continue; }
     fs.writeFileSync(target, content);
     written.push(`${rel(dir)}/${file}`);

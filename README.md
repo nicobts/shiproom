@@ -5,11 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Self-verdict: Ship & See 5-1-1](https://img.shields.io/badge/self--verdict-Ship%20%26%20See%205--1--1-0f766e)](./docket/001-shiproom/)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-compatible-6e56cf)](https://agentskills.io)
+[![validate](https://github.com/nicobts/shiproom/actions/workflows/validate.yml/badge.svg)](https://github.com/nicobts/shiproom/actions/workflows/validate.yml)
+
+[**Site**](https://nicobts.github.io/shiproom/) · [**A real verdict**](https://nicobts.github.io/shiproom/docket/001-shiproom/) · [Install](#install--as-a-skill-in-any-coding-agent) · [The Docket](#the-docket) · [Contributing](./CONTRIBUTING.md) · [Roadmap](./ROADMAP.md)
 
 **English** · [简体中文](./i18n/README.zh-CN.md) · [日本語](./i18n/README.ja.md) · [Español](./i18n/README.es.md) · [Italiano](./i18n/README.it.md) · [Français](./i18n/README.fr.md) — [add your language](./i18n/)
-
-Built by **Nicolas Bossi** ([LinkedIn](https://www.linkedin.com/in/nicolas-bossi-26a326b3/) · [nicolasbossi@gmail.com](mailto:nicolasbossi@gmail.com)) —
-I got tired of every AI telling me every idea was great, so I built the thing that wouldn't.
 
 Ask an AI to evaluate your project and you get flattery. Ask the Council and you get
 seven adversarial seats — CTO, CFO, VC, CMO, CEO, your target customer, and a Chair —
@@ -22,18 +22,32 @@ allowed to soften, rendered as an interactive verdict page.
   <img src="assets/hero.jpg" alt="The Shiproom: seven shadowed seats on a judicial bench — six teal verdict lights, one red dissent — judging an idea, a paper boat folded from a pitch document" width="100%">
 </p>
 
-> **It judged itself first.** We ran the Council on this very repo before launching.
+> **It judged itself first.** I ran the Council on this repo before launching.
 > Verdict: **Ship & See, 5–1–1** — the VC voted to SHELVE it ("no revenue mechanism,
 > no moat, and I will not launder the vocabulary to avoid saying so"). The dissent is
 > the product working. [Read Docket entry #001](./docket/001-shiproom/) or
-> [view the live verdict page](https://nicobts.github.io/shiproom/docket/001-shiproom/).
+> [open the live verdict page](https://nicobts.github.io/shiproom/docket/001-shiproom/).
 
-## Run it in 30 seconds — no install
+## What you get
 
-Paste [`SHIPROOM.md`](./SHIPROOM.md) into any capable AI agent or chat — Claude, ChatGPT,
-Gemini, Cursor, Codex, anything — along with a description of your project. That's the
-whole setup. The repo version below adds web-verified fact bases, structured
-`verdict.json` output, and the interactive verdict page.
+Every run produces a verdict page: the ruling and its tally, the bench as seven lights,
+the dissent pulled to the front, and each seat's argument with its key number, flip
+condition and one action — the full written filing one click deeper. One self-contained
+HTML file, dark or light, no build step, no accounts, no telemetry.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/verdict-page-dark.png">
+    <img src="assets/verdict-page-light.png" alt="A Shiproom verdict page: the ruling Ship and See with a 5-1-1 tally, the bench of seven seat lights, and the dissenting seat's quote" width="100%">
+  </picture>
+</p>
+
+Each verdict also renders a share card — the decision, the tally, the bench, and the
+dissent in the dissenter's own words:
+
+<p align="center">
+  <img src="docket/001-shiproom/card.png" alt="Shiproom share card: Ship and See, 5-1-1, seven seat lights, and the VC's dissent quote" width="80%">
+</p>
 
 ## Install — as a skill, in any coding agent
 
@@ -61,24 +75,14 @@ npx skills add nicobts/shiproom --global   # every project
 `.claude/skills/` for Claude Code, `.agents/skills/` for Codex, Cursor, Gemini CLI and
 OpenCode (or the user-level equivalent, e.g. `~/.claude/skills/`).
 
+**Zero install** — paste [`SHIPROOM.md`](./SHIPROOM.md) into any capable AI along with a
+description of your project. That's the whole setup; the repo version adds web-verified
+fact bases, structured `verdict.json` output, and the verdict page.
+
 Nothing is written to your project except the council's own state in `.council/`. Your
 `AGENTS.md`, `CLAUDE.md` and other files are never touched.
 
-Then, in your agent:
-
-> /shiproom scope
-
-or, in agents without slash commands:
-
-> Run the Shiproom on this project. My docs are in ./docs.
-> My constraints: [hours/week, funding, team, goal].
-
-Your agent runs the council in your language — an Italian founder's council argues in
-Italian. Zero i18n, global by construction.
-
-## The guided experience
-
-The Council is a five-step flow with resumable state in `.council/`:
+## The five-step flow
 
 ```
 /shiproom scope    the Clerk interviews you (one question at a time), seats the bench
@@ -88,63 +92,15 @@ The Council is a five-step flow with resumable state in `.council/`:
 /shiproom docket   package it for the public Docket
 ```
 
-Quit mid-grill tonight; `/shiproom grill` resumes at the same seat tomorrow. As a
-plugin, the command is namespaced: `/shiproom:shiproom scope`.
+State lives in `.council/`, so you can quit mid-grill tonight and resume at the same seat
+tomorrow. In agents without slash commands, ask for it in words — "run the Shiproom on
+this project" — and your agent follows the same flows. It argues in your language: an
+Italian founder's council deliberates in Italian.
 
-## The helper script — plumbing, not thinking
-
-The deliberation runs in *your* agent. A zero-dependency Node 18+ script inside the
-skill, `scripts/shiproom.js`, handles the deterministic parts; the skill tells your agent
-when to call it, so you rarely run it yourself:
-
-```
-node skills/shiproom/scripts/shiproom.js validate   check verdict.json against the schema and protocol rules
-node skills/shiproom/scripts/shiproom.js view       serve the verdict page on 127.0.0.1
-node skills/shiproom/scripts/shiproom.js card       generate a 1200×630 share card (--png for social previews)
-node skills/shiproom/scripts/shiproom.js docket     package a verdict for the public Docket
-node skills/shiproom/scripts/shiproom.js canary     drift check on a run of the flawed fixture
-```
-
-`canary` is the anti-sycophancy test: run the council on
-[`references/canary/FIXTURE.md`](./skills/shiproom/references/canary/FIXTURE.md) with any
-new model — if the verdict comes back cheerful, the protocol failed, not passed.
-
-> **Note — npm.** Shiproom is not published to npm, and the unscoped name `shiproom`
-> belongs to an unrelated package: never run `npx shiproom`. If a standalone CLI is
-> published later, it will be under a scoped name such as `@nicobts/shiproom`.
-
-## The verdict page — summary on the bench, depth one click deeper
-
-Each seat appears twice: the ~250-word floor argument you can scan in seconds, and —
-expandable beneath it — the seat's full written assessment: analysis, evidence with
-every estimate flagged, ranked risks, the flip condition expanded into the signals to
-watch, and 3–5 prioritized recommendations. The verdict tells you the decision; the
-filings tell you what to do about it.
-
-
-The run writes `.council/verdict.json`; `/shiproom verdict` (or the helper's `view`)
-serves the page locally. You get the bench (one seat, one vote, at a glance), the
-tally, every seat's argument with its flip condition, and the pre-committed go/no-go
-thresholds. Single file, zero build, no accounts, no telemetry — nobody is farming you.
-
-## Grill mode — appeal the verdict
-
-The deliberation judges your documents; the grill judges *you*. Each seat questions you
-directly, one question at a time — answers must be numbers, facts, names, or decisions.
-Dodge twice and the question is recorded verbatim as an **open wound** in your verdict.
-Answer well and seats revise their votes; the Chair re-tallies. Frank, not cruel: the
-protocol bans insults and theatrics — specificity is the aggression. See
-[`references/GRILL.md`](./skills/shiproom/references/GRILL.md).
-
-## The Docket
-
-Published verdicts, starting with our own. Ran the Council and willing to show the
-scars? PR your verdict folder into `docket/` — SHELVE verdicts especially welcome;
-getting roasted well is a badge of honor.
-
-| # | Project | Verdict | Tally |
-|---|---------|---------|-------|
-| 001 | [Shiproom (this repo)](./docket/001-shiproom/) | Ship & See | 5–1–1, VC dissenting |
+**Grill mode** judges *you* rather than your documents: each seat questions you directly,
+answers must be numbers, facts, names or decisions, and dodging twice records the
+question verbatim as an **open wound** in your verdict. Frank, not cruel — the protocol
+bans insults and theatrics. See [`references/GRILL.md`](./skills/shiproom/references/GRILL.md).
 
 ## Why this works when "be brutally honest" doesn't
 
@@ -161,74 +117,36 @@ structurally:
    you know the outcome, never edited after.
 5. **The unanimity alarm** — a unanimously cheerful run is treated as a failed run.
 
-## Contributing — add a seat, or a language
+## The helper script
 
-Translations are the easiest first PR: condensed READMEs live in [`i18n/`](./i18n/) —
-copy one, translate, add yourself to the switcher line. The protocol itself needs no
-translation: your agent runs the council in your language natively.
-
-## Contributing — add a seat to the bench
-
-A new seat or council template is a ~30-line markdown file: mandate, kill question,
-verdict semantics. Grant Reviewer for nonprofits, Game Designer, PhD Advisor, Clinical
-Regulator — if you know a vantage point that kills bad ideas, PR it. See
-[`references/CHARTER.md`](./skills/shiproom/references/CHARTER.md) for the invariants (the ICP seat and the Chair are never removed;
-the verdict format is mandatory everywhere).
-
-## Repository layout
+The deliberation runs in *your* agent. A zero-dependency Node 18+ script inside the
+skill handles the deterministic parts, and the skill tells your agent when to call it:
 
 ```
-skills/shiproom/                   the Agent Skill — self-contained, install this folder
-  SKILL.md                         entry point: subcommands, global rules, helper usage
-  references/CHARTER.md            the protocol: seats, ground rules, verdict format
-  references/GRILL.md              interrogation rules and tone clause
-  references/flows/                guided flows: scope, run, grill, verdict, docket
-  references/verdict.schema.json   output contract
-  references/canary/FIXTURE.md     flawed fixture project for drift checks
-  references/examples/             a full sample verdict
-  assets/dashboard.html            the verdict page (single file, zero build)
-  scripts/shiproom.js              zero-dependency helper: validate, view, card, docket, canary
-.claude-plugin/                    Claude Code plugin + marketplace manifests
-SHIPROOM.md                        one-file zero-install edition — paste into any AI
-docket/                            published verdicts — #001 is this repo judging itself
-tests/                             node:test suite for the helper (npm test)
+node skills/shiproom/scripts/shiproom.js validate   check verdict.json against the schema and protocol rules
+node skills/shiproom/scripts/shiproom.js view       serve the verdict page on 127.0.0.1
+node skills/shiproom/scripts/shiproom.js card       1200×630 share card (--png for social previews)
+node skills/shiproom/scripts/shiproom.js docket     package a verdict for the public Docket
+node skills/shiproom/scripts/shiproom.js canary     drift check on a run of the flawed fixture
 ```
 
-## Roadmap
+`canary` is the anti-sycophancy test: run the council on
+[`references/canary/FIXTURE.md`](./skills/shiproom/references/canary/FIXTURE.md) with any
+new model — if the verdict comes back cheerful, the protocol failed, not passed.
 
-### Next steps
+> **Note — npm.** Shiproom is not published to npm, and the unscoped name `shiproom`
+> belongs to an unrelated package: never run `npx shiproom`. If a standalone CLI is
+> published later, it will be under a scoped name such as `@nicobts/shiproom`.
 
-- [x] Self-contained Agent Skill layout — installable with `npx skills add`
-- [x] Claude Code plugin and marketplace manifests
-- [x] Helper script validates against the full schema, serves on localhost only, and is
-      covered by tests in CI (Node 18, 20, 22)
-- [ ] Verify the install end to end in Claude Code (plugin and `npx skills`), Codex,
-      Cursor, Gemini CLI and OpenCode
-- [x] Tag the first release, `v0.3.0`, with release notes
-- [ ] Record a 20-second demo of a verdict landing and embed it at the top of this README
-- [ ] Submit to skill and plugin directories (skills.sh, Claude Code plugin marketplaces)
+## The Docket
 
-### Recommended improvements
+Published verdicts, starting with my own. Ran the Council and willing to show the
+scars? PR your verdict folder into `docket/` — SHELVE verdicts especially welcome;
+getting roasted well is a badge of honor.
 
-- [ ] Publish a second Docket entry with a SHELVE verdict, to show the council kills
-      ideas and not just blesses its author's
-- [ ] Run the canary in CI against stored reference verdicts, one that must pass and one
-      that must fail
-- [ ] Generate `SHIPROOM.md` from `references/` so the paste-anywhere edition cannot drift
-      from the charter
-- [ ] Alternative benches as templates: nonprofit, research project, internal tool
-- [ ] Issue templates for new seats and Docket submissions
-- [x] A one-command PNG export for the share card (`card --png`)
-
-### Possible later
-
-- [ ] Scoped npm package (`@nicobts/shiproom`) exposing the helper as a standalone CLI
-- [ ] Gemini CLI extension and Codex plugin manifests, alongside the Claude Code plugin
-- [ ] Multi-model benches as a first-class option, with the model per seat recorded in
-      `verdict.json`
-- [ ] Measure verdict stability: repeat runs across models and report how often the
-      decision changes
-- [ ] A Docket gallery on GitHub Pages, filterable by decision
+| # | Project | Verdict | Tally |
+|---|---------|---------|-------|
+| 001 | [Shiproom (this repo)](./docket/001-shiproom/) | Ship & See | 5–1–1, VC dissenting |
 
 ## Honest limitation
 
@@ -238,6 +156,13 @@ hypothesis and its thresholds as the experiment that tests it. And model behavio
 drifts: the repo ships a fixture project with a known honest verdict as a drift canary —
 if a new model returns unanimous cheerfulness on it, the protocol needs tightening, not
 celebrating.
+
+## Contributing
+
+A translation is the easiest first PR; a new seat is a ~30-line markdown file (mandate,
+kill question, verdict semantics), and a published verdict is the most welcome of all.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the invariants, the repository layout and
+how changes land. What's next is in [ROADMAP.md](./ROADMAP.md).
 
 ## About
 

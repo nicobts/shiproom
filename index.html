@@ -84,8 +84,9 @@
   .sec-kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
   h2{font-family:var(--disp);font-weight:600;font-size:clamp(28px,4.4vw,44px);line-height:1.1;letter-spacing:-.01em;max-width:24ch}
   .lede{margin-top:16px;max-width:64ch;color:var(--ink-soft);font-size:17px}
-  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
-  .reveal.in{opacity:1;transform:none}
+  /* Only hide sections when JS is there to reveal them — without it the page reads in full. */
+  .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .js .reveal.in{opacity:1;transform:none}
 
   /* flattery vs verdict */
   .versus{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -191,6 +192,7 @@
   footer a{color:var(--ink-soft)} footer a:hover{color:var(--teal)}
 </style>
 </head>
+<script>document.documentElement.className+=" js";</script>
 <body>
 <div class="beam" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
