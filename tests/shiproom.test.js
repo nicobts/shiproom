@@ -13,7 +13,7 @@ const SCRIPT = path.join(ROOT, 'skills', 'shiproom', 'scripts', 'shiproom.js');
 const SAMPLE = path.join(ROOT, 'skills', 'shiproom', 'references', 'examples', 'sample.verdict.json');
 const DOCKET_001 = path.join(ROOT, 'docket', '001-shiproom', 'verdict.json');
 
-const run = (args, cwd = ROOT) => spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: 'utf8' });
+const run = (args, cwd = ROOT, env = {}) => spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
 const tmpDir = () => fs.mkdtempSync(path.join(os.tmpdir(), 'shiproom-test-'));
 const sample = () => JSON.parse(fs.readFileSync(SAMPLE, 'utf8'));
 function writeVerdict(dir, data) {
@@ -127,6 +127,20 @@ test('docket builds a self-contained entry', () => {
   assert.match(html, /"sample": false/);
   assert.ok(fs.existsSync(path.join(entry, 'README.md')));
   assert.strictEqual(run(['validate', path.join(entry, 'verdict.json')]).status, 0);
+});
+
+test('docket removes a stale card.png when the render fails', () => {
+  const dir = tmpDir();
+  const d = sample();
+  const p = writeVerdict(dir, d);
+  const entry = path.join(dir, 'docket-entry', `${d.date}-${d.project.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`);
+  fs.mkdirSync(entry, { recursive: true });
+  fs.writeFileSync(path.join(entry, 'card.png'), 'stale, not a PNG');
+  const r = run(['docket', p], dir, { SHIPROOM_BROWSER: path.join(dir, 'no-such-browser') });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.ok(!fs.existsSync(path.join(entry, 'card.png')), 'the stale PNG must not survive a failed render');
+  assert.match(r.stdout, /card\.png skipped/);
+  assert.match(r.stdout, /\(verdict\.json, index\.html, README\.md, card\.svg\)/, 'card.png must not be reported as written');
 });
 
 test('canary fails a cheerful run and passes a critical one', () => {
