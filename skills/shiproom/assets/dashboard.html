@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- shiproom:meta — replaced with the verdict's own title and preview when published -->
 <title>Shiproom — Verdict</title>
-<!-- shiproom:meta -->
 <meta name="description" content="A Shiproom verdict: seven adversarial seats, one pre-committed decision.">
 <meta property="og:title" content="Shiproom — Verdict">
 <meta property="og:description" content="Seven adversarial seats, one pre-committed decision.">
@@ -537,7 +537,8 @@ function pickDissent(d){
 
 function render(d){
   const dec = (d.grill && d.grill.finalDecision) || d.verdict.decision;
-  document.title = `${d.project} — ${labelOf(dec)} · Shiproom verdict`;
+  // Matches the static title that tools/docket-build.js writes for published entries.
+  document.title = `${d.project} — ${labelOf(dec)} · ${/shiproom/i.test(d.project) ? 'Council' : 'Shiproom'} verdict`;
   $('project').textContent = d.project;
   $('tagline').textContent = d.tagline || '';
   $('badge-date').textContent = d.date || '';

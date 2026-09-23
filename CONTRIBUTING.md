@@ -31,9 +31,14 @@ Ran the Council and willing to show the scars? PR your verdict folder into `dock
 docket/NNN-your-project/
   verdict.json    required — must validate against skills/shiproom/references/verdict.schema.json
   README.md       required — tally, one line per seat, your thresholds
-  index.html      optional — copy of skills/shiproom/assets/dashboard.html for the interactive page
-  card.svg        share card, written by `shiproom docket` (plus card.png when Chrome or Edge is installed)
+  index.html      generated — the verdict page with your verdict baked in
+  card.svg        generated — share card (card.png too, for social previews)
 ```
+
+`index.html`, `card.svg` and `card.png` are built from your `verdict.json`; run
+`node tools/docket-build.js` and commit what it writes. Never edit them by hand — CI
+rebuilds them and fails if they drift. CI also rejects any change to a published
+`verdict.json`: the record stands, only the page around it improves.
 
 Use the next free `NNN`. Validate before pushing:
 
