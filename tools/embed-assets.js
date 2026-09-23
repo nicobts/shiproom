@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// Embeds skills/shiproom/assets/fonts/*.woff2 into the verdict page as data URIs, so
-// the page stays one self-contained file that works offline and when copied anywhere.
-// Run after changing the fonts: node tools/embed-fonts.js  (tests check it is current).
+// Embeds the fonts (assets/fonts/*.woff2) and the council artwork (assets/council.jpg)
+// into the verdict page as data URIs, so the page stays one self-contained file that
+// works offline and when copied anywhere. Run after changing either:
+//   node tools/embed-assets.js        (a test checks the page is current)
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -24,19 +25,26 @@ function fontFaceCss() {
   }).join('\n');
 }
 
-const START = '<style id="shiproom-fonts">';
-const END = '</style>';
-function embed(html) {
-  const i = html.indexOf(START);
-  if (i === -1) throw new Error(`${START} not found in ${PAGE}`);
-  const j = html.indexOf(END, i);
-  return html.slice(0, i + START.length) + '\n' + fontFaceCss() + '\n' + html.slice(j);
+function heroCss() {
+  const data = fs.readFileSync(path.join(ASSETS, 'council.jpg')).toString('base64');
+  return `.hero{background-image:url(data:image/jpeg;base64,${data})}`;
 }
 
-module.exports = { embed, fontFaceCss, PAGE };
+const BLOCKS = [['<style id="shiproom-fonts">', fontFaceCss], ['<style id="shiproom-hero">', heroCss]];
+const END = '</style>';
+function embed(html) {
+  return BLOCKS.reduce((out, [start, build]) => {
+    const i = out.indexOf(start);
+    if (i === -1) throw new Error(`${start} not found in ${PAGE}`);
+    const j = out.indexOf(END, i);
+    return out.slice(0, i + start.length) + '\n' + build() + '\n' + out.slice(j);
+  }, html);
+}
+
+module.exports = { embed, fontFaceCss, heroCss, PAGE };
 
 if (require.main === module) {
   const html = fs.readFileSync(PAGE, 'utf8');
   fs.writeFileSync(PAGE, embed(html));
-  console.log(`embedded ${FACES.length} font faces into ${path.relative(process.cwd(), PAGE)}`);
+  console.log(`embedded ${FACES.length} font faces + council.jpg into ${path.relative(process.cwd(), PAGE)}`);
 }

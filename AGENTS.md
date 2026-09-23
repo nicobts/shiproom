@@ -14,6 +14,8 @@ This repository **is** the Shiproom skill. To *run* a council, load
 - `SHIPROOM.md` — the one-file, paste-anywhere edition. Keep it in sync with the charter.
 - `docket/` — published verdicts. **Never edit a published verdict.**
 - `tests/` — `node:test` suite for the helper script.
+- `tools/embed-assets.js` — re-embeds the fonts and `assets/council.jpg` into the verdict
+  page after either changes; a test fails if the page is stale.
 
 ## Rules
 

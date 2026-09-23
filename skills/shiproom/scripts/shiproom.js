@@ -127,9 +127,9 @@ function tallyOf(d) {
   return Object.entries(tally).map(([v, n]) => `${VOTE_LABEL[v]} ${n}`).join(' · ');
 }
 const CARD_THEMES = {
-  dark: { bg: '#0A111C', glow: '#46E0C6', panel: '#121D2E', rule: '#22334C', ink: '#E9EFF7', soft: '#A9B8CD', faint: '#7D8CA3', accent: '#46E0C6',
+  dark: { bg: '#0A111C', bg2: '#0E1B2E', glow: '#46E0C6', panel: '#121D2E', rule: '#22334C', ink: '#E9EFF7', soft: '#A9B8CD', faint: '#7D8CA3', accent: '#46E0C6',
     vote: { INVEST: '#52C98D', SHIP_AND_SEE: '#E4B44A', SHELVE: '#F0604C', ABSTAIN: '#8A96AC' }, glowOpacity: 0.55 },
-  light: { bg: '#F4F6F9', glow: '#0F766E', panel: '#FFFFFF', rule: '#DCE3EC', ink: '#131C2A', soft: '#415069', faint: '#64738A', accent: '#0F766E',
+  light: { bg: '#F4F6F9', bg2: '#EAF1F3', glow: '#0F766E', panel: '#FFFFFF', rule: '#DCE3EC', ink: '#131C2A', soft: '#415069', faint: '#64738A', accent: '#0F766E',
     vote: { INVEST: '#1C7A53', SHIP_AND_SEE: '#946300', SHELVE: '#B3382A', ABSTAIN: '#5C6B82' }, glowOpacity: 0 },
 };
 const CARD_FONTS = [
@@ -212,10 +212,11 @@ function cardSvg(d, themeName) {
   <defs>
     <style>${embeddedFonts()}
       .disp{font-family:'Fraunces',Georgia,serif}.sans{font-family:'Instrument Sans',system-ui,sans-serif}.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}</style>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${t.bg}"/><stop offset="1" stop-color="${t.bg2}"/></linearGradient>
     <radialGradient id="halo" cx="18%" cy="0%" r="70%"><stop offset="0" stop-color="${t.glow}" stop-opacity="${glowOn ? 0.16 : 0.07}"/><stop offset="1" stop-color="${t.glow}" stop-opacity="0"/></radialGradient>
     <filter id="blur" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="9"/></filter>
   </defs>
-  <rect width="1200" height="630" fill="${t.bg}"/>
+  <rect width="1200" height="630" fill="url(#ground)"/>
   <rect width="1200" height="630" fill="url(#halo)"/>
   <rect x="0" y="0" width="1200" height="6" fill="${vc}"/>
   <text x="72" y="84" class="disp" font-size="28" font-weight="700" fill="${t.ink}">Shiproom<tspan fill="${t.accent}">.</tspan></text>
@@ -223,7 +224,6 @@ function cardSvg(d, themeName) {
   <text x="72" y="178" class="disp" font-size="${titleSize}" font-weight="700" fill="${t.ink}">${esc(d.project)}</text>
   ${tagline.map((l, i) => `<text x="72" y="${220 + i * 30}" class="sans" font-size="21" fill="${t.soft}">${esc(l)}</text>`).join('\n  ')}
   <text x="72" y="330" class="mono" font-size="14" letter-spacing="3" fill="${t.accent}">THE COUNCIL RULES</text>
-  ${glowOn ? `<text x="72" y="412" class="disp" font-size="84" font-weight="700" fill="${vc}" opacity="0.45" filter="url(#blur)">${esc(VOTE_LABEL[dec])}</text>` : ''}
   <text x="72" y="412" class="disp" font-size="84" font-weight="700" fill="${vc}">${esc(VOTE_LABEL[dec])}</text>
   <text x="72" y="462" class="disp" font-size="34" font-weight="600" fill="${t.ink}">${esc(score)}<tspan dx="16" dy="-3" class="mono" font-size="13" font-weight="400" letter-spacing="1.5" fill="${t.faint}">${esc(scoreLabel)}</tspan></text>
   <rect x="712" y="152" width="416" height="${panelH}" rx="16" fill="${t.panel}" stroke="${t.rule}"/>

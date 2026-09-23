@@ -109,10 +109,11 @@ test('card --png renders a 1200x630 PNG when a browser is available', (t) => {
   assert.strictEqual(png.readUInt32BE(20), 630);
 });
 
-test('the verdict page embeds the current font files', () => {
-  const { embed, PAGE } = require('../tools/embed-fonts.js');
+test('the verdict page embeds the current fonts and artwork', () => {
+  const { embed, PAGE } = require('../tools/embed-assets.js');
   const html = fs.readFileSync(PAGE, 'utf8').replace(/\r\n/g, '\n');
-  assert.strictEqual(embed(html), html, 'run: node tools/embed-fonts.js');
+  assert.strictEqual(embed(html), html, 'run: node tools/embed-assets.js');
+  assert.match(html, /<style id="shiproom-hero">\s*\.hero\{background-image:url\(data:image\/jpeg/);
 });
 
 test('docket builds a self-contained entry', () => {
